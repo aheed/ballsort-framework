@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: ballsort
+Version: 0.0.3
+Summary: A framework for learning async Python
+Author-email: Anders Heed <aheed88888@gmail.com>
+Project-URL: Homepage, https://github.com/aheed/ballsort-framework
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
+# Ballsort
+
+A framework for learning async Python. Includes challenges. Includes interop with a Ballsort display window for use in a JupyterLab environment.
+

@@ -1,0 +1,8 @@
+{
+    "python.autoComplete.extraPaths": [
+        "./lib/src/ballsort"
+    ],
+    "python.analysis.extraPaths": [
+        "./lib/src/ballsort"
+    ]
+}
