@@ -2,7 +2,7 @@ import asyncio
 from dataclasses import replace
 import sys
 
-sys.path.append("../content/ballsortutils")
+sys.path.append("../src/ballsort")
 
 from control_factory import get_control_sim
 from ch1_scenario import Ch1Scenario

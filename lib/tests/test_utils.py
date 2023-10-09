@@ -1,7 +1,7 @@
 import asyncio
 import sys
 
-sys.path.append("../content/ballsortutils")
+sys.path.append("../src/ballsort")
 
 from ball_control import BallControl
 from state_update_model import StatePosition

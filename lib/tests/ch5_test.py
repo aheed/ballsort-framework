@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import replace
 import sys
-sys.path.append("../content/ballsortutils")
+sys.path.append("../src/ballsort")
 
 from test_utils import move_ball_by_column
 from control_factory import get_ch4_control_sim

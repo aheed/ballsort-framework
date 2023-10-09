@@ -1,5 +1,5 @@
 import sys
-sys.path.append("../content/ballsortutils")
+sys.path.append("../src/ballsort")
 
 import asyncio
 from control_factory import get_control_sim

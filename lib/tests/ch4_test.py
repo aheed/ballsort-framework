@@ -1,7 +1,7 @@
 import asyncio
 from dataclasses import replace
 import sys
-sys.path.append("../content/ballsortutils")
+sys.path.append("../src/ballsort")
 
 from ball_control import IllegalBallControlStateError
 from test_utils import move_ball, move_ball_by_column
