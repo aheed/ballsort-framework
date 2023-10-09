@@ -40,7 +40,10 @@ class BallControlSim(BallControl, ScenarioControl):
         await self.update_reporter.send_update(state_update)
    
     async def _delay(self, duration: float):
+        end_time = self.state.elapsed + duration
         await asyncio.sleep(duration * self.delay_mult)
+        if end_time > self.state.elapsed:
+            self.state.elapsed = end_time
 
     async def _move_relative(self, x: int, y: int, delay: float = 1.0):
         delayTask = asyncio.create_task(self._delay(delay))

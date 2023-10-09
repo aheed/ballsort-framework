@@ -40,6 +40,8 @@ async def sequence_concurrent():
         await t2
         await bc.open_claw()
 
+    print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
+
 def main():
     asyncio.run(sequence_concurrent())
 

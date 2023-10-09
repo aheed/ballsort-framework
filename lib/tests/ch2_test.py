@@ -89,6 +89,8 @@ async def example_solution():
     assert(not bc.is_in_goal_state())
     await move_ball(bc=bc, src=StatePosition(x=1, y=4), dest=StatePosition(x=0, y=2))
     assert(bc.is_in_goal_state())
+
+    print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
     
 def main():
     test_goal_state()

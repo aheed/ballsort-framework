@@ -57,6 +57,8 @@ async def example_solution():
     await asyncio.gather(bc.move_horizontally(-2), bc.move_vertically(-1))
     await bc.open_claw()
 
+    print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
+
 
 def main():
     test_goal_state()

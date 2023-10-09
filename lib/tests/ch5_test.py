@@ -48,6 +48,8 @@ async def example_solution():
     await move_ball_by_column(bc=bc, src_x=0, dest_x=2)
     await move_ball_by_column(bc=bc, src_x=1, dest_x=2)
     await move_ball_by_column(bc=bc, src_x=1, dest_x=3)
+
+    print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
     
 
 def main():

@@ -54,6 +54,7 @@ class StateModel:
     operating_claw: bool
     spotlight: Spotlight | None
     highlights: list[Highlight] | None
+    elapsed: float
 
 @dataclass
 class StateUpdateModel:
@@ -73,5 +74,6 @@ def get_default_state() -> StateModel:
         moving_vertically=False,
         operating_claw=False,
         spotlight=None,
-        highlights=None
+        highlights=None,
+        elapsed=0.0
     )

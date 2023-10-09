@@ -61,6 +61,8 @@ async def example_solution():
 
     await move_tower(height=bc.get_state().max_y + 1, src_x=0, dest_x=2)
 
+    print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
+
 def main():
     test_goal_state()
     asyncio.run(test_validation())

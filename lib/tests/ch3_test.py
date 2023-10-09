@@ -59,6 +59,8 @@ async def example_solution():
     for i in range(4):
         await sort_column(x=i)
 
+    print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
+
 def main():
     test_goal_state()
     asyncio.run(example_solution())
@@ -69,4 +71,4 @@ if __name__ == "__main__":
     s = time.perf_counter()
     main()
     elapsed = time.perf_counter() - s
-    print(f"\n{__file__} executed in {elapsed:0.2f} seconds.")
+    print(f"\n{__file__} executed in {elapsed:0.3f} seconds.")
