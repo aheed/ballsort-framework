@@ -35,66 +35,67 @@ class StateManager:
         print(f"Goal:\n{scenario.get_goal_state_description()}")
         return state
 
-    def _move_relative(self, state: StateModel, x: int, y: int) -> StateModel:
-        newX = state.claw.pos.x + x
-        newY = state.claw.pos.y + y
-        state = replace(state, claw=replace(state.claw, pos=StatePosition(x = newX, y = newY)))
+    def _move_relative(self, state: StateModel, x: int, y: int, claw_index: int) -> StateModel:
+        newX = state.claws[claw_index].pos.x + x
+        newY = state.claws[claw_index].pos.y + y
+        newClawState = replace(state.claws[claw_index], pos=StatePosition(x = newX, y = newY))
+        state.claws[claw_index] = newClawState
         #print(f"new position: {newX}, {newY}")
         return state
 
-    def move_horizontally_start(self, state: StateModel, distance: int) -> StateModel:
-        self.validator.move_horizontally(state=state, distance=distance)
-        state.moving_horizontally = True
-        return self._move_relative(state=state,x=distance, y=0)
+    def move_horizontally_start(self, state: StateModel, distance: int, claw_index: int = 0) -> StateModel:
+        self.validator.move_horizontally(state=state, distance=distance, claw_index=claw_index)
+        state.claws[claw_index].moving_horizontally = True
+        return self._move_relative(state=state,x=distance, y=0, claw_index=claw_index)
     
-    def move_horizontally_end(self, state: StateModel) -> StateModel:
-        state.moving_horizontally = False
+    def move_horizontally_end(self, state: StateModel, claw_index: int = 0) -> StateModel:
+        state.claws[claw_index].moving_horizontally = False
         return state
 
-    def move_vertically_start(self, state: StateModel, distance: int) -> StateModel:
-        self.validator.move_vertically(state=state, distance=distance)
-        state.moving_vertically = True
-        return self._move_relative(state=state, x=0, y=distance)
+    def move_vertically_start(self, state: StateModel, distance: int, claw_index: int = 0) -> StateModel:
+        self.validator.move_vertically(state=state, distance=distance, claw_index=claw_index)
+        state.claws[claw_index].moving_vertically = True
+        return self._move_relative(state=state, x=0, y=distance, claw_index=claw_index)
 
-    def move_vertically_end(self, state: StateModel) -> StateModel:
-        state.moving_vertically = False
+    def move_vertically_end(self, state: StateModel, claw_index: int = 0) -> StateModel:
+        state.claws[claw_index].moving_vertically = False
         return state
 
-    def open_claw_start(self, state: StateModel) -> StateModel:
-        self.validator.open_claw(state)
-        state.operating_claw = True
-        state.claw.open = True
+    def open_claw_start(self, state: StateModel, claw_index: int = 0) -> StateModel:
+        self.validator.open_claw(state, claw_index=claw_index)
+        state.claws[claw_index].operating_claw = True
+        state.claws[claw_index].open = True
         #print(f"opening claw")
-        if not is_ball_in_claw(state):
+        if not is_ball_in_claw(state, claw_index=claw_index):
             return state
-        print(f"dropping at {state.claw.pos}")
-        newBall = StateBall(pos=state.claw.pos, color=state.claw.ball_color, value=state.claw.ball_value, label=state.claw.ball_label)
-        state.claw.ball_color = ""
-        state.claw.ball_value = 0 #not strictly necessary
-        state.claw.ball_label = "" #not strictly necessary
+        print(f"dropping at {state.claws[claw_index].pos}")
+        newBall = StateBall(pos=state.claws[claw_index].pos, color=state.claws[claw_index].ball_color, value=state.claws[claw_index].ball_value, label=state.claws[claw_index].ball_label)
+        state.claws[claw_index].ball_color = ""
+        state.claws[claw_index].ball_value = 0 #not strictly necessary
+        state.claws[claw_index].ball_label = "" #not strictly necessary
         state.balls.append(newBall)
         return self._check_goal_state(state)
 
-    def close_claw_start(self, state: StateModel) -> StateModel:
-        self.validator.close_claw(state)
-        state.operating_claw = True
-        state.claw.open = False
+    def close_claw_start(self, state: StateModel, claw_index: int = 0) -> StateModel:
+        self.validator.close_claw(state, claw_index=claw_index)
+        state.claws[claw_index].operating_claw = True
+        state.claws[claw_index].open = False
         #print(f"closing claw")
-        ball_to_grab = get_ball_at_current_pos(state)
+        ball_to_grab = get_ball_at_current_pos(state, claw_index=claw_index)
         if not ball_to_grab:
             return state
-        print(f"grabbing {ball_to_grab} at {state.claw.pos}")
-        state.claw.ball_color = ball_to_grab.color
-        state.claw.ball_value = ball_to_grab.value
-        state.claw.ball_label = ball_to_grab.label
+        print(f"grabbing {ball_to_grab} at {state.claws[claw_index].pos}")
+        state.claws[claw_index].ball_color = ball_to_grab.color
+        state.claws[claw_index].ball_value = ball_to_grab.value
+        state.claws[claw_index].ball_label = ball_to_grab.label
         #remove ball from list
         state.balls = [ball for ball in state.balls if ball.pos != ball_to_grab.pos]
         return self._check_goal_state(state)
 
-    def open_claw_end(self, state: StateModel) -> StateModel:
-        state.operating_claw = False
+    def open_claw_end(self, state: StateModel, claw_index: int = 0) -> StateModel:
+        state.claws[claw_index].operating_claw = False
         return state
 
-    def close_claw_end(self, state: StateModel) -> StateModel:
-        state.operating_claw = False
+    def close_claw_end(self, state: StateModel, claw_index: int = 0) -> StateModel:
+        state.claws[claw_index].operating_claw = False
         return state

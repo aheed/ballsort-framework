@@ -17,49 +17,49 @@ from state_update_model import (
 class StateValidator:
     """Validates operations"""
 
-    def move_horizontally(self, state: StateModel, distance: int):
-        if (state.moving_horizontally):
+    def move_horizontally(self, state: StateModel, distance: int, claw_index: int):
+        if (state.claws[claw_index].moving_horizontally):
             raise IllegalBallControlStateError("Already moving horizontally")
         
-        newX = state.claw.pos.x + distance
+        newX = state.claws[claw_index].pos.x + distance
         if newX < MIN_X or newX > state.max_x:
             raise IllegalBallControlStateError(f"X coordinate out of bounds x={newX} minX={MIN_X} maxX={state.max_x}")
     
-    def move_vertically(self, state: StateModel, distance: int) -> None:
-        if (state.moving_vertically):
+    def move_vertically(self, state: StateModel, distance: int, claw_index: int) -> None:
+        if (state.claws[claw_index].moving_vertically):
             raise IllegalBallControlStateError("Already moving vertically")
         
-        newY = state.claw.pos.y + distance
+        newY = state.claws[claw_index].pos.y + distance
         if newY < MIN_Y or newY > state.max_y:
             raise IllegalBallControlStateError(f"Y coordinate out of bounds y={newY} minY={MIN_Y} maxY={state.max_y}")
 
-    def _check_claw_for_ongoing_operations(self, state: StateModel):
-        if (state.operating_claw):
+    def _check_claw_for_ongoing_operations(self, state: StateModel, claw_index: int):
+        if (state.claws[claw_index].operating_claw):
             raise IllegalBallControlStateError("Claw already opening or closing")
         
-        if (state.moving_horizontally or state.moving_vertically):
+        if (state.claws[claw_index].moving_horizontally or state.claws[claw_index].moving_vertically):
             raise IllegalBallControlStateError("Marble dropped while claw is in motion")
 
-    def open_claw(self, state: StateModel):
+    def open_claw(self, state: StateModel, claw_index: int):
         #print("state: ", state)
-        if not is_ball_in_claw(state):
+        if not is_ball_in_claw(state, claw_index=claw_index):
             return
         
-        self._check_claw_for_ongoing_operations(state=state)
+        self._check_claw_for_ongoing_operations(state=state, claw_index=claw_index)
 
-        if state.claw.pos.y != get_top_vacant_index(state):
+        if state.claws[claw_index].pos.y != get_top_vacant_index(state, claw_index=claw_index):
             raise IllegalBallControlStateError(
-                f"Illegal drop location. Must be topmost vacant position ({get_top_vacant_index(state)}). Y={state.claw.pos.y}."
+                f"Illegal drop location. Must be topmost vacant position ({get_top_vacant_index(state, claw_index=claw_index)}). Y={state.claws[claw_index].pos.y}."
             )
 
-    def close_claw(self, state: StateModel):
+    def close_claw(self, state: StateModel, claw_index: int):
         #print("state: ", state)
-        if not is_ball_at_current_pos(state):
+        if not is_ball_at_current_pos(state, claw_index=claw_index):
             return
         
-        self._check_claw_for_ongoing_operations(state=state)
+        self._check_claw_for_ongoing_operations(state=state, claw_index=claw_index)
 
-        if state.claw.pos.y != get_top_occupied_index(state):
+        if state.claws[claw_index].pos.y != get_top_occupied_index(state, claw_index=claw_index):
             raise IllegalBallControlStateError(
-                f"Illegal grab. Must be topmost marble position ({get_top_occupied_index(state)}). Y={state.claw.pos.y}."
+                f"Illegal grab. Must be topmost marble position ({get_top_occupied_index(state, claw_index=claw_index)}). Y={state.claws[claw_index].pos.y}."
             )

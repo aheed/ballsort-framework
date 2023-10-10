@@ -72,8 +72,8 @@ class BallControlSim(BallControl, ScenarioControl):
             self.state = self.state_manager.move_vertically_end(state=self.state)
             await self.__send_update()
 
-    def get_position(self) -> StatePosition:
-        return self.state.claw.pos
+    def get_position(self, claw_index: int = 0) -> StatePosition:
+        return self.state.claws[claw_index].pos
 
     async def open_claw(self):
         try:

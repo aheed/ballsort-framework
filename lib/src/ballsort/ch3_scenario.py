@@ -32,7 +32,7 @@ class Ch3Scenario(Scenario):
     def is_in_goal_state(self, state: StateModel) -> bool:
 
         # No ball in claw
-        if state.claw.ball_color:
+        if state.claws[0].ball_color:
             return False
         
         def validate_ball(ball: StateBall) -> bool:

@@ -30,7 +30,7 @@ class Ch5Scenario(Scenario):
     def is_in_goal_state(self, state: StateModel) -> bool:
 
         # No ball in claw
-        if state.claw.ball_color:
+        if state.claws[0].ball_color:
             return False
         
         columns: list[list[StateBall]] = [[] for _ in range(state.max_x + 1)]

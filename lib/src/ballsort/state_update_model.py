@@ -28,6 +28,9 @@ class Claw:
     ball_color: str
     ball_value: int
     ball_label: str
+    moving_horizontally: bool
+    moving_vertically: bool
+    operating_claw: bool
 
 @dataclass
 class Spotlight:
@@ -47,11 +50,8 @@ class StateModel:
     max_x: int
     max_y: int
     balls: list[StateBall]
-    claw: Claw
-    goal_accomplished: bool
-    moving_horizontally: bool
-    moving_vertically: bool
-    operating_claw: bool
+    claws: list[Claw]
+    goal_accomplished: bool    
     spotlight: Spotlight | None
     highlights: list[Highlight] | None
     elapsed: float
@@ -68,11 +68,8 @@ def get_default_state() -> StateModel:
         max_x=3,
         max_y=4,
         balls=[StateBall(pos=StatePosition(x=2, y=4), color="blue")],
-        claw=Claw(pos=StatePosition(x=0, y=0), open=True, ball_color="", ball_value=0, ball_label=""),
+        claws=[Claw(pos=StatePosition(x=0, y=0), open=True, ball_color="", ball_value=0, ball_label="", moving_horizontally=False, moving_vertically=False, operating_claw=False)],
         goal_accomplished=False,
-        moving_horizontally=False,
-        moving_vertically=False,
-        operating_claw=False,
         spotlight=None,
         highlights=None,
         elapsed=0.0
