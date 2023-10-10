@@ -48,7 +48,7 @@ class StateModel:
     max_y: int
     balls: list[StateBall]
     claw: Claw
-    isInGoalState: bool
+    goal_accomplished: bool
     moving_horizontally: bool
     moving_vertically: bool
     operating_claw: bool
@@ -69,7 +69,7 @@ def get_default_state() -> StateModel:
         max_y=4,
         balls=[StateBall(pos=StatePosition(x=2, y=4), color="blue")],
         claw=Claw(pos=StatePosition(x=0, y=0), open=True, ball_color="", ball_value=0, ball_label=""),
-        isInGoalState=False,
+        goal_accomplished=False,
         moving_horizontally=False,
         moving_vertically=False,
         operating_claw=False,

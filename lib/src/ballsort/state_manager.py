@@ -23,10 +23,10 @@ class StateManager:
     def _check_goal_state(self, state: StateModel) -> StateModel:
         if self.scenario is None:
             return state
-        isInGoalState = self.scenario.is_in_goal_state(state)
-        if (isInGoalState and not state.isInGoalState):
+        goal_accomplished = self.scenario.is_in_goal_state(state)
+        if (goal_accomplished and not state.goal_accomplished):
             print("Goal accomplished! 😁")
-        state.isInGoalState = isInGoalState
+        state.goal_accomplished = goal_accomplished
         return state
 
     def set_scenario(self, state: StateModel, scenario: Scenario) -> StateModel:

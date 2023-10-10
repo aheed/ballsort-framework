@@ -16,6 +16,7 @@ First update version info in **lib/pyproject.toml**. Then build.
 
 ```
 cd lib
+rm -rf dist
 python3 -m build
 ```
 
