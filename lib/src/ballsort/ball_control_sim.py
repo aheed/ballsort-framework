@@ -93,7 +93,7 @@ class BallControlSim(BallControl, ScenarioControl):
             await self.__send_update()
             await delayTask
         finally:
-            self.state = self.state_manager.close_claw_end(state=self.state)
+            self.state = self.state_manager.close_claw_end(state=self.state, claw_index=claw_index)
 
     async def set_scenario(self, scenario: Scenario):
         self.state = self.state_manager.set_scenario(state=self.state, scenario=scenario)

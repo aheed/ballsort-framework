@@ -17,7 +17,13 @@ from state_update_model import (
 class StateValidator:
     """Validates operations"""
 
+    def _check_claw_index(self, state: StateModel, claw_index:int):
+        if not claw_index < len(state.claws):
+            raise IndexError("Claw index out of bounds")
+
     def move_horizontally(self, state: StateModel, distance: int, claw_index: int):
+        self._check_claw_index(state=state, claw_index=claw_index)
+
         if (state.claws[claw_index].moving_horizontally):
             raise IllegalBallControlStateError("Already moving horizontally")
         
@@ -26,6 +32,8 @@ class StateValidator:
             raise IllegalBallControlStateError(f"X coordinate out of bounds x={newX} minX={MIN_X} maxX={state.max_x}")
     
     def move_vertically(self, state: StateModel, distance: int, claw_index: int) -> None:
+        self._check_claw_index(state=state, claw_index=claw_index)
+
         if (state.claws[claw_index].moving_vertically):
             raise IllegalBallControlStateError("Already moving vertically")
         
@@ -41,7 +49,8 @@ class StateValidator:
             raise IllegalBallControlStateError("Marble dropped while claw is in motion")
 
     def open_claw(self, state: StateModel, claw_index: int):
-        #print("state: ", state)
+        self._check_claw_index(state=state, claw_index=claw_index)
+
         if not is_ball_in_claw(state, claw_index=claw_index):
             return
         
@@ -53,7 +62,8 @@ class StateValidator:
             )
 
     def close_claw(self, state: StateModel, claw_index: int):
-        #print("state: ", state)
+        self._check_claw_index(state=state, claw_index=claw_index)
+
         if not is_ball_at_current_pos(state, claw_index=claw_index):
             return
         

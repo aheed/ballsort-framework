@@ -96,6 +96,6 @@ class StateManager:
         state.claws[claw_index].operating_claw = False
         return state
 
-    def close_claw_end(self, state: StateModel, claw_index: int = 0) -> StateModel:
+    def close_claw_end(self, state: StateModel, claw_index: int) -> StateModel:
         state.claws[claw_index].operating_claw = False
         return state
