@@ -15,21 +15,21 @@ class BallControl(object):
     async def __aexit__(self, *_):
         pass
 
-    async def move_horizontally(self, distance: int):
+    async def move_horizontally(self, distance: int, claw_index: int = 0):
         """Move the claw horizontally"""
         pass
 
-    async def move_vertically(self, distance: int):
+    async def move_vertically(self, distance: int, claw_index: int = 0):
         """Move the claw vertically"""
         pass
 
-    async def open_claw(self):
+    async def open_claw(self, claw_index: int = 0):
         pass
 
-    async def close_claw(self):
+    async def close_claw(self, claw_index: int = 0):
         pass
 
-    def get_position(self) -> StatePosition:
+    def get_position(self, claw_index: int = 0) -> StatePosition:
         raise NotImplementedError
     
     def get_progress(self) -> ScenarioProgress:
