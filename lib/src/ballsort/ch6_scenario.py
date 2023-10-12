@@ -1,6 +1,7 @@
 from dataclasses import dataclass, replace
 from scenario import Scenario
 from state_update_model import (
+    Highlight,
     StateBall,
     StateModel,
     StatePosition,
@@ -13,7 +14,7 @@ class Ch6Scenario(Scenario):
     """Challenge Implementation"""
 
     def get_goal_state_description(self) -> str:
-        return f"Swap positions\n{self.get_dimensions_description()}"
+        return f"Blue in leftmost column. Yellow in rightmost column. Left claw can operate in columns 0-2. Right claw can operate in columns 2-4.\n{self.get_dimensions_description()}"
     
     def get_initial_state(self) -> StateModel:
         max_x = 4
@@ -26,8 +27,10 @@ class Ch6Scenario(Scenario):
         claw0 = get_default_state().claws[0]
         claw1 = replace(claw0, pos = StatePosition(x=4, y=0))
         claws = [claw0, claw1]
+
+        highlights = [Highlight(xMin=2, xMax=2, yMin=0, yMax=4, color="beige")]
         
-        return replace(get_default_state(), balls = balls, max_x=max_x, max_y=max_y, claws=claws)
+        return replace(get_default_state(), balls = balls, max_x=max_x, max_y=max_y, claws=claws, highlights=highlights)
 
     def is_in_goal_state(self, state: StateModel) -> bool:
 

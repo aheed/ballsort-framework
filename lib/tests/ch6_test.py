@@ -37,6 +37,7 @@ async def example_solution():
 
     await move_ball_by_column(bc=bc, src_x=3, dest_x=2, claw_index=1)
 
+    await bc.move_horizontally(1, claw_index=1)
     await move_ball_by_column(bc=bc, src_x=2, dest_x=0, claw_index=0)
 
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
@@ -58,7 +59,10 @@ async def example_solution_concurrent():
 
     await move_ball_by_column(bc=bc, src_x=3, dest_x=2, claw_index=1)
 
-    await move_ball_by_column(bc=bc, src_x=2, dest_x=0, claw_index=0)
+    await asyncio.gather(
+        bc.move_horizontally(1, claw_index=1),
+        move_ball_by_column(bc=bc, src_x=2, dest_x=0, claw_index=0)
+    ) 
 
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
 
