@@ -21,8 +21,30 @@ class StateValidator:
         if not claw_index < len(state.claws):
             raise IndexError("Claw index out of bounds")
 
+    def _check_claw_collision(self, state: StateModel, claw_index: int, x: int):
+        if len(state.claws) > claw_index+1:
+            compare_index = claw_index+1
+            compare_x = state.claws[compare_index].pos.x
+            #print(f"horizontal position of claw {claw_index} ({x}) must be < horizontal position of claw {compare_index} ({compare_x})")
+            if x >= compare_x:
+                raise IllegalBallControlStateError(f"horizontal position of claw {claw_index} ({x}) must be < horizontal position of claw {compare_index} ({compare_x})")
+
+        if claw_index > 0:
+            compare_index = claw_index-1
+            compare_x = state.claws[compare_index].pos.x
+            #print(f"horizontal position of claw {claw_index} ({x}) must be > horizontal position of claw {compare_index} ({compare_x})")
+            if x <= compare_x:
+                raise IllegalBallControlStateError(f"horizontal position of claw {claw_index} ({x}) must be > horizontal position of claw {compare_index} ({compare_x})")
+
+    def _check_claw_collision_old(self, state: StateModel):
+        for i in range(len(state.claws) - 1):
+            print(f"horizontal position of claw {i+1} ({state.claws[i+1].pos.x}) must be > horizontal position of claw {i} ({state.claws[i].pos.x})")
+            if state.claws[i+1].pos.x <= state.claws[i].pos.x:
+                raise IllegalBallControlStateError(f"horizontal position of claw {i+1} ({state.claws[i+1].pos.x}) must be > horizontal position of claw {i} ({state.claws[i].pos.x})")
+
     def move_horizontally(self, state: StateModel, distance: int, claw_index: int):
         self._check_claw_index(state=state, claw_index=claw_index)
+        
 
         if (state.claws[claw_index].moving_horizontally):
             raise IllegalBallControlStateError("Already moving horizontally")
@@ -30,6 +52,7 @@ class StateValidator:
         newX = state.claws[claw_index].pos.x + distance
         if newX < MIN_X or newX > state.max_x:
             raise IllegalBallControlStateError(f"X coordinate out of bounds x={newX} minX={MIN_X} maxX={state.max_x}")
+        self._check_claw_collision(state=state, claw_index=claw_index, x=newX)
     
     def move_vertically(self, state: StateModel, distance: int, claw_index: int) -> None:
         self._check_claw_index(state=state, claw_index=claw_index)
