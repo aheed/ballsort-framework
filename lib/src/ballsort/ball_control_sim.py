@@ -50,50 +50,50 @@ class BallControlSim(BallControl, ScenarioControl):
         await self.__send_update()
         await delayTask
 
-    async def move_horizontally(self, distance: int):
+    async def move_horizontally(self, distance: int, claw_index: int = 0):
         if (0 == distance):
             return
         
         try:
-            self.state = self.state_manager.move_horizontally_start(state=self.state, distance=distance)
+            self.state = self.state_manager.move_horizontally_start(state=self.state, distance=distance, claw_index=claw_index)
             await self._move_relative(x=distance, y=0, delay=1.0)            
         finally:
-            self.state = self.state_manager.move_horizontally_end(state=self.state)
+            self.state = self.state_manager.move_horizontally_end(state=self.state, claw_index=claw_index)
             await self.__send_update()
 
-    async def move_vertically(self, distance: int) -> None:
+    async def move_vertically(self, distance: int, claw_index: int = 0) -> None:
         if (0 == distance):
             return
         
         try:
-            self.state = self.state_manager.move_vertically_start(state=self.state, distance=distance)
+            self.state = self.state_manager.move_vertically_start(state=self.state, distance=distance, claw_index=claw_index)
             await self._move_relative(x=0, y=distance, delay=1.5)
         finally:
-            self.state = self.state_manager.move_vertically_end(state=self.state)
+            self.state = self.state_manager.move_vertically_end(state=self.state, claw_index=claw_index)
             await self.__send_update()
 
-    def get_position(self) -> StatePosition:
-        return self.state.claw.pos
+    def get_position(self, claw_index: int = 0) -> StatePosition:
+        return self.state.claws[claw_index].pos
 
-    async def open_claw(self):
+    async def open_claw(self, claw_index: int = 0):
         try:
             delayTask = asyncio.create_task(self._delay(0.3))
-            self.state = self.state_manager.open_claw_start(state=self.state)
+            self.state = self.state_manager.open_claw_start(state=self.state, claw_index=claw_index)
 
             await self.__send_update()
             await delayTask
         finally:
-            self.state = self.state_manager.open_claw_end(state=self.state)
+            self.state = self.state_manager.open_claw_end(state=self.state, claw_index=claw_index)
 
-    async def close_claw(self):
+    async def close_claw(self, claw_index: int = 0):
         try:
             delayTask = asyncio.create_task(self._delay(0.3))
-            self.state = self.state_manager.close_claw_start(state=self.state)
+            self.state = self.state_manager.close_claw_start(state=self.state, claw_index=claw_index)
 
             await self.__send_update()
             await delayTask
         finally:
-            self.state = self.state_manager.close_claw_end(state=self.state)
+            self.state = self.state_manager.close_claw_end(state=self.state, claw_index=claw_index)
 
     async def set_scenario(self, scenario: Scenario):
         self.state = self.state_manager.set_scenario(state=self.state, scenario=scenario)

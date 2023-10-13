@@ -13,20 +13,20 @@ from state_validator import StateValidator
 class Ch4StateValidator(StateValidator):
     """Validates operations"""
 
-    def open_claw(self, state: StateModel):
-        super().open_claw(state=state)
+    def open_claw(self, state: StateModel, claw_index: int):
+        super().open_claw(state=state, claw_index=claw_index)
 
-        if not is_ball_in_claw(state):
+        if not is_ball_in_claw(state, claw_index=claw_index):
             return
 
-        if state.claw.pos.y == state.max_y:
+        if state.claws[claw_index].pos.y == state.max_y:
             return
 
         ball_below = next(
             (
                 ball
                 for ball in state.balls
-                if ball.pos.x == state.claw.pos.x and ball.pos.y == state.claw.pos.y + 1
+                if ball.pos.x == state.claws[claw_index].pos.x and ball.pos.y == state.claws[claw_index].pos.y + 1
             ),
             None,
         )
@@ -34,7 +34,7 @@ class Ch4StateValidator(StateValidator):
             return
 
         # check for values of balls
-        if ball_below.value < state.claw.ball_value:
+        if ball_below.value < state.claws[claw_index].ball_value:
             raise IllegalBallControlStateError(
-                f"Marble (value={state.claw.ball_value})dropped on top of lower value ({ball_below.value}) marble"
+                f"Marble (value={state.claws[claw_index].ball_value})dropped on top of lower value ({ball_below.value}) marble"
             )
