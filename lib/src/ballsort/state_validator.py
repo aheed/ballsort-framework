@@ -36,12 +36,6 @@ class StateValidator:
             if x <= compare_x:
                 raise IllegalBallControlStateError(f"horizontal position of claw {claw_index} ({x}) must be > horizontal position of claw {compare_index} ({compare_x})")
 
-    def _check_claw_collision_old(self, state: StateModel):
-        for i in range(len(state.claws) - 1):
-            print(f"horizontal position of claw {i+1} ({state.claws[i+1].pos.x}) must be > horizontal position of claw {i} ({state.claws[i].pos.x})")
-            if state.claws[i+1].pos.x <= state.claws[i].pos.x:
-                raise IllegalBallControlStateError(f"horizontal position of claw {i+1} ({state.claws[i+1].pos.x}) must be > horizontal position of claw {i} ({state.claws[i].pos.x})")
-
     def move_horizontally(self, state: StateModel, distance: int, claw_index: int):
         self._check_claw_index(state=state, claw_index=claw_index)
         
