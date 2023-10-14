@@ -2,6 +2,7 @@
 import ball_control_ch2
 from ball_control_ch4 import BallControlCh4
 from ball_control_ch6 import BallControlCh6
+from ball_control_ch8 import BallControlCh8
 from ball_control_sim import BallControlSim
 #from v1_update_reporter import V1UpdateReporter
 #from ably_update_reporter import AblyUpdateReporter
@@ -32,3 +33,7 @@ def get_ch5_control_sim(delay_multiplier: float = 1.0) -> BallControlCh4:
 def get_ch6_control_sim(delay_multiplier: float = 1.0) -> BallControlCh6:
     reporter = PostMessageUpdateReporter()
     return BallControlCh6(update_reporter=reporter, delay_multiplier=delay_multiplier)
+
+def get_ch8_control_sim(delay_multiplier: float = 1.0) -> BallControlCh8:
+    reporter = PostMessageUpdateReporter()
+    return BallControlCh8(update_reporter=reporter, delay_multiplier=delay_multiplier)

@@ -24,7 +24,7 @@ class Ch7Scenario(Scenario):
         max_y = 6
         random.seed(self._seed)
 
-        value_y_pairs = [(random.randint(0,10), y) for y in  range(2,7)]
+        value_y_pairs = [(random.randint(0,10), y) for y in range(2,7)]
         balls = [StateBall(pos=StatePosition(x=1, y=y), color="yellow", value=v, label=f"{v}") for (v,y) in value_y_pairs]
 
         return replace(get_default_state(), balls = balls, max_x=max_x, max_y=max_y)
@@ -43,7 +43,7 @@ class Ch7Scenario(Scenario):
         actual_values = [ball.value for ball in sorted(state.balls, key=lambda ball: ball.pos.y)]
         expected_values = sorted(actual_values)
 
-        print(expected_values, actual_values)
+        #print(expected_values, actual_values)
 
         return expected_values == actual_values
     
