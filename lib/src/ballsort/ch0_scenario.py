@@ -15,7 +15,7 @@ class Ch0Scenario(Scenario):
     def get_goal_state_description(self) -> str:
         return f"All marbles shall be in the leftmost column.\n{self.get_dimensions_description()}"
     
-    def get_initial_state(self, seed: int | None = None) -> StateModel:
+    def get_initial_state(self) -> StateModel:
         balls = [
             StateBall(pos=StatePosition(x=3, y=4), color="blue"),
             StateBall(pos=StatePosition(x=2, y=4), color="blue"),

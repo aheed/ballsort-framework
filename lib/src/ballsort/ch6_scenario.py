@@ -16,7 +16,7 @@ class Ch6Scenario(Scenario):
     def get_goal_state_description(self) -> str:
         return f"Blue in leftmost column. Yellow in rightmost column. Left claw can operate in columns 0-2. Right claw can operate in columns 2-4.\n{self.get_dimensions_description()}"
     
-    def get_initial_state(self, seed: int | None = None) -> StateModel:
+    def get_initial_state(self) -> StateModel:
         max_x = 4
         max_y = 4
         balls = [

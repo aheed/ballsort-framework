@@ -28,7 +28,7 @@ def test_goal_state():
 
 async def example_solution():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch7Scenario())
+    await bc.set_scenario(Ch7Scenario(seed=4211))
 
     for _ in range(len(bc.get_state().balls)):
 

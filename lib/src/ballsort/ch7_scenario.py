@@ -13,13 +13,16 @@ from state_update_model import (
 class Ch7Scenario(Scenario):
     """Challenge Implementation"""
 
+    def __init__(self, seed:int | None = None):
+        super().__init__(seed=seed)
+
     def get_goal_state_description(self) -> str:
         return f"All marbles sorted by value in the leftmost column. Lowest value on top."
     
-    def get_initial_state(self, seed: int | None = None) -> StateModel:
+    def get_initial_state(self) -> StateModel:
         max_x = 4
         max_y = 6
-        random.seed(seed)
+        random.seed(self._seed)
         minVal = 0
         maxVal = 10
         ballColor = "yellow"

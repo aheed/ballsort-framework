@@ -15,7 +15,7 @@ class Ch3Scenario(Scenario):
     def get_goal_state_description(self) -> str:
         return f"Turn Polish flag 🇵🇱 into Indonesian flag 🇮🇩.\n{self.get_dimensions_description()}"
     
-    def get_initial_state(self, seed: int | None = None) -> StateModel:
+    def get_initial_state(self) -> StateModel:
         
         def build_column(x: int) -> list[StateBall]:
             r_balls = [StateBall(pos=StatePosition(x=x, y=y), color="red") for y in range(3, 5)]
