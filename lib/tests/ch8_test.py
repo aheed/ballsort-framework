@@ -4,9 +4,9 @@ import sys
 sys.path.append("../src/ballsort")
 
 from test_utils import move_ball_by_column
-from control_factory import get_ch8_control_sim
+from control_factory import get_control_sim
 from ch8_scenario import Ch8Scenario
-from ball_control_ch8 import BallControlCh8
+from ball_control import BallControl
 from state_update_model import StateBall, StatePosition
 from ball_control import IllegalBallControlStateError
 
@@ -34,7 +34,7 @@ def test_goal_state():
     assert sc.is_in_goal_state(state) == True
 
 async def test_claw_0_position_limit():
-    bc = get_ch8_control_sim(0)
+    bc = get_control_sim(0)
     await bc.set_scenario(Ch8Scenario())    
     exception_caught = False
 
@@ -48,7 +48,7 @@ async def test_claw_0_position_limit():
     assert(exception_caught)
 
 async def test_claw_1_position_limit():
-    bc = get_ch8_control_sim(0)
+    bc = get_control_sim(0)
     await bc.set_scenario(Ch8Scenario())
     exception_caught = False
 
@@ -61,7 +61,7 @@ async def test_claw_1_position_limit():
 
     assert(exception_caught)
 
-async def sort_column(bc: BallControlCh8, src_x1: int, src_x2: int, dest_x: int, nof_balls: int, claw_index: int):
+async def sort_column(bc: BallControl, src_x1: int, src_x2: int, dest_x: int, nof_balls: int, claw_index: int):
     """takes balls from columns src_x1 and src_x2 and puts them, ordered by value, in column dest_x"""
 
     for _ in range(nof_balls):
@@ -89,7 +89,7 @@ async def sort_column(bc: BallControlCh8, src_x1: int, src_x2: int, dest_x: int,
         await move_ball_by_column(bc=bc, src_x=src_column_index, dest_x=dest_x, claw_index=claw_index)
     
 async def example_solution():
-    bc = get_ch8_control_sim(0)
+    bc = get_control_sim(0)
     await bc.set_scenario(Ch8Scenario())
 
     a = sort_column(bc=bc, src_x1=1, src_x2=2, dest_x=0, nof_balls= len(bc.get_state().balls)//2, claw_index=0)
