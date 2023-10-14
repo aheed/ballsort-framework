@@ -23,17 +23,9 @@ class Ch7Scenario(Scenario):
         max_x = 4
         max_y = 6
         random.seed(self._seed)
-        minVal = 0
-        maxVal = 10
-        ballColor = "yellow"
-        balls = [
-            StateBall(pos=StatePosition(x=1, y=6), color=ballColor, value=random.randint(minVal, maxVal)),
-            StateBall(pos=StatePosition(x=1, y=5), color=ballColor, value=random.randint(minVal, maxVal)),
-            StateBall(pos=StatePosition(x=1, y=4), color=ballColor, value=random.randint(minVal, maxVal)),
-            StateBall(pos=StatePosition(x=1, y=3), color=ballColor, value=random.randint(minVal, maxVal)),
-            StateBall(pos=StatePosition(x=1, y=2), color=ballColor, value=random.randint(minVal, maxVal)),
-        ]
-        balls = [replace(ball, label=f"{ball.value}") for ball in balls]
+
+        value_y_pairs = [(random.randint(0,10), y) for y in  range(2,7)]
+        balls = [StateBall(pos=StatePosition(x=1, y=y), color="yellow", value=v, label=f"{v}") for (v,y) in value_y_pairs]
 
         return replace(get_default_state(), balls = balls, max_x=max_x, max_y=max_y)
 
