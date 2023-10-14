@@ -39,13 +39,16 @@ class StateValidator:
     def move_horizontally(self, state: StateModel, distance: int, claw_index: int):
         self._check_claw_index(state=state, claw_index=claw_index)
         
+        claw = state.claws[claw_index]
 
-        if (state.claws[claw_index].moving_horizontally):
+        if (claw.moving_horizontally):
             raise IllegalBallControlStateError("Already moving horizontally")
         
-        newX = state.claws[claw_index].pos.x + distance
-        if newX < MIN_X or newX > state.max_x:
-            raise IllegalBallControlStateError(f"X coordinate out of bounds x={newX} minX={MIN_X} maxX={state.max_x}")
+        newX = claw.pos.x + distance
+        min_x = max(MIN_X, claw.min_x)
+        max_x = min(state.max_x, claw.max_x)
+        if newX < min_x or newX > max_x:
+            raise IllegalBallControlStateError(f"X coordinate out of bounds x={newX} minX={min_x} maxX={max_x}")
         self._check_claw_collision(state=state, claw_index=claw_index, x=newX)
     
     def move_vertically(self, state: StateModel, distance: int, claw_index: int) -> None:

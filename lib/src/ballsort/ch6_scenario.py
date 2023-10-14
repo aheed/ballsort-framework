@@ -24,11 +24,12 @@ class Ch6Scenario(Scenario):
             StateBall(pos=StatePosition(x=4, y=4), color="blue"),
         ]
 
-        claw0 = get_default_state().claws[0]
-        claw1 = replace(claw0, pos = StatePosition(x=4, y=0))
+
+        claw0 = replace(get_default_state().claws[0], max_x = 2)
+        claw1 = replace(claw0, pos=StatePosition(x=4, y=0), min_x=2, max_x = 4)
         claws = [claw0, claw1]
 
-        highlights = [Highlight(xMin=2, xMax=2, yMin=0, yMax=4, color="beige")]
+        highlights = [Highlight(xMin=2, xMax=2, yMin=0, yMax=4, color="#eeeeee")]
         
         return replace(get_default_state(), balls = balls, max_x=max_x, max_y=max_y, claws=claws, highlights=highlights)
 

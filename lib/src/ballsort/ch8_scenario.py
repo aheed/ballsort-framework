@@ -37,8 +37,8 @@ class Ch8Scenario(Scenario):
 
         balls = blue_balls + yellow_balls
 
-        claw0 = get_default_state().claws[0]
-        claw1 = replace(claw0, pos=StatePosition(x=6, y=0))
+        claw0 = replace(get_default_state().claws[0], max_x = 2)
+        claw1 = replace(claw0, pos=StatePosition(x=6, y=0), min_x=4, max_x = 6)
         claws = [claw0, claw1]
 
         highlights = [Highlight(xMin=3, xMax=3, yMin=0, yMax=4, color="gray")]
@@ -71,13 +71,11 @@ class Ch8Scenario(Scenario):
         
         actual_col0_values = [ball.value for ball in sorted(column0, key=lambda ball: ball.pos.y)]
         expected_col0_values = sorted(actual_col0_values)
-        print("blue column:", actual_col0_values, expected_col0_values) #Temp
         if actual_col0_values != expected_col0_values:
             return False
         
         actual_col6_values = [ball.value for ball in sorted(column6, key=lambda ball: ball.pos.y)]
         expected_col6_values = sorted(actual_col6_values)
-        print("yellow column:", actual_col6_values, expected_col6_values) #Temp
         if actual_col6_values != expected_col6_values:
             return False
 
