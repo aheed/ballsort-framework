@@ -17,7 +17,7 @@ class Ch2Scenario(Scenario):
     def get_goal_state_description(self) -> str:
         return f"Sort balls by weight in leftmost column. Heaviest at the bottom.\n{self.get_dimensions_description()}"
     
-    def get_initial_state(self) -> StateModel:
+    def get_initial_state(self, seed: int | None = None) -> StateModel:
         balls = [
             StateBall(pos=StatePosition(x=1, y=2), color="yellow"),
             StateBall(pos=StatePosition(x=1, y=3), color="blue"),

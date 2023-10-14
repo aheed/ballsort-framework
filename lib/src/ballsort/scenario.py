@@ -10,7 +10,7 @@ class ScenarioProgress(object):
 class Scenario(object):
     """Interface for a specific scenario"""
 
-    def get_initial_state(self) -> StateModel:
+    def get_initial_state(self, seed: int | None = None) -> StateModel:
         """Returns the initial state for the scenario."""
         raise NotImplementedError
     
@@ -27,5 +27,5 @@ class Scenario(object):
         raise NotImplementedError
     
     def get_dimensions_description(self) -> str:
-        init_state = self.get_initial_state()
+        init_state = self.get_initial_state(seed=None)
         return f"maxX={init_state.max_x}, maxY={init_state.max_y}"

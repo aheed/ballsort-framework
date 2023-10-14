@@ -1,7 +1,7 @@
 from dataclasses import dataclass, replace
+import random
 from scenario import Scenario
 from state_update_model import (
-    Highlight,
     StateBall,
     StateModel,
     StatePosition,
@@ -16,9 +16,10 @@ class Ch7Scenario(Scenario):
     def get_goal_state_description(self) -> str:
         return f"All marbles sorted by value in the leftmost column. Lowest value on top."
     
-    def get_initial_state(self) -> StateModel:
+    def get_initial_state(self, seed: int | None = None) -> StateModel:
         max_x = 4
         max_y = 6
+        random.seed(seed)
         balls = [
             StateBall(pos=StatePosition(x=1, y=6), color="yellow", value=3, label=f"{3}"),
             StateBall(pos=StatePosition(x=1, y=5), color="yellow", value=12, label=f"{12}"),

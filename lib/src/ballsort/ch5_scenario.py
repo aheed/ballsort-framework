@@ -15,7 +15,7 @@ class Ch5Scenario(Scenario):
     def get_goal_state_description(self) -> str:
         return f"Bicolor Towers of Hanoi\nMove all marbles to two separate columns, one of each color. A marble can not be placed on top of a marble of lower value.\n{self.get_dimensions_description()}"
     
-    def get_initial_state(self) -> StateModel:
+    def get_initial_state(self, seed: int | None = None) -> StateModel:
         balls: list[StateBall] = []
         max_x = 3
         max_y = 5
