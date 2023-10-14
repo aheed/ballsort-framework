@@ -3,7 +3,7 @@ from dataclasses import replace
 import sys
 sys.path.append("../src/ballsort")
 
-from test_utils import move_ball_by_column
+from test_utils import move_ball_by_column, sort_column
 from control_factory import get_control_sim
 from ch7_scenario import Ch7Scenario
 from state_update_model import StateBall, StatePosition
@@ -28,31 +28,9 @@ def test_goal_state():
 
 async def example_solution():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch7Scenario(seed=4211))
+    await bc.set_scenario(Ch7Scenario(seed=4711))
 
-    for _ in range(len(bc.get_state().balls)):
-
-        column1: list[StateBall] = [ball for ball in bc.get_state().balls if ball.pos.x == 1]
-        column2: list[StateBall] = [ball for ball in bc.get_state().balls if ball.pos.x == 2]
-        column1_sorted = [ball.value for ball in sorted(column1, key=lambda ball: ball.pos.y)]
-        column2_sorted = [ball.value for ball in sorted(column2, key=lambda ball: ball.pos.y)]
-
-        if len(column1_sorted) == 0:
-            src_column_index = 2
-        elif len(column2_sorted) == 0:
-            src_column_index = 1
-        else:
-            src_column_index = 1 if max(column1_sorted) >= max(column2_sorted) else 2
-
-        dest_column_index = 2 if src_column_index == 1 else 1
-        src_column = [column1_sorted, column2_sorted][src_column_index - 1]
-        
-        minpos = src_column.index(max(src_column))
-
-        for _ in range(minpos):
-            await move_ball_by_column(bc=bc, src_x=src_column_index, dest_x=dest_column_index)
-
-        await move_ball_by_column(bc=bc, src_x=src_column_index, dest_x=0)
+    await sort_column(bc=bc, src_x1=1, src_x2=2, dest_x=0, nof_balls=len(bc.get_state().balls), claw_index=0)
 
     assert bc.get_state().goal_accomplished
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
