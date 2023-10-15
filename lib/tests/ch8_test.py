@@ -16,11 +16,11 @@ def test_goal_state():
     assert sc.is_in_goal_state(state) == False
 
     balls = [
-        StateBall(pos=StatePosition(x=0, y=2), color="blue", value=101),
-        StateBall(pos=StatePosition(x=0, y=3), color="blue", value=102),
-        StateBall(pos=StatePosition(x=0, y=4), color="blue", value=103),
-        StateBall(pos=StatePosition(x=0, y=5), color="blue", value=104),
-        StateBall(pos=StatePosition(x=0, y=6), color="blue", value=105),
+        StateBall(pos=StatePosition(x=0, y=2), color="lightblue", value=101),
+        StateBall(pos=StatePosition(x=0, y=3), color="lightblue", value=102),
+        StateBall(pos=StatePosition(x=0, y=4), color="lightblue", value=103),
+        StateBall(pos=StatePosition(x=0, y=5), color="lightblue", value=104),
+        StateBall(pos=StatePosition(x=0, y=6), color="lightblue", value=105),
 
         StateBall(pos=StatePosition(x=6, y=2), color="yellow", value=101),
         StateBall(pos=StatePosition(x=6, y=3), color="yellow", value=102),

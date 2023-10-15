@@ -31,7 +31,7 @@ class Ch8Scenario(Scenario):
         random.seed(self._seed)
         
         value_y_pairs = [(random.randint(0,10), y) for y in range(2,7)]
-        blue_balls = [StateBall(pos=StatePosition(x=2, y=y), color="blue", value=v, label=f"{v}") for (v,y) in value_y_pairs]
+        blue_balls = [StateBall(pos=StatePosition(x=2, y=y), color="lightblue", value=v, label=f"{v}") for (v,y) in value_y_pairs]
         value_y_pairs = [(random.randint(0,10), y) for y in range(2,7)]
         yellow_balls = [StateBall(pos=StatePosition(x=4, y=y), color="yellow", value=v, label=f"{v}") for (v,y) in value_y_pairs]
 
@@ -41,7 +41,7 @@ class Ch8Scenario(Scenario):
         claw1 = replace(claw0, pos=StatePosition(x=6, y=0), min_x=4, max_x = 6)
         claws = [claw0, claw1]
 
-        highlights = [Highlight(xMin=3, xMax=3, yMin=0, yMax=4, color="gray")]
+        highlights = [Highlight(xMin=3, xMax=3, yMin=0, yMax=6, color="gray")]
 
         return replace(
             get_default_state(),
