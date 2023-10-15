@@ -83,7 +83,9 @@ class BallControlSim(BallControl, ScenarioControl):
             await self.__send_update()
             await delayTask
         finally:
-            self.state = self.state_manager.open_claw_end(state=self.state, claw_index=claw_index)
+            self.state, dirty = self.state_manager.open_claw_end(state=self.state, claw_index=claw_index)
+            if dirty:
+                await self.__send_update(include_balls=True)
 
     async def close_claw(self, claw_index: int = 0):
         try:

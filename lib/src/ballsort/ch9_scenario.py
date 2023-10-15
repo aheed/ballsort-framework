@@ -53,7 +53,7 @@ class Ch9Scenario(Scenario):
 
         return expected_values == actual_values
     
-    def on_ball_dropped(self, state: StateModel, ball: StateBall) -> StateModel:
+    def on_ball_dropped(self, state: StateModel, ball: StateBall) -> tuple[StateModel, bool]:
         """Override"""
         return self.reveal_action.on_ball_dropped(state=state, ball=ball)
     

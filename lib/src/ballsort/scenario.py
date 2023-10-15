@@ -35,6 +35,6 @@ class Scenario(object):
         init_state = self.get_initial_state()
         return f"maxX={init_state.max_x}, maxY={init_state.max_y}"
 
-    def on_ball_dropped(self, state: StateModel, ball: StateBall) -> StateModel:
+    def on_ball_dropped(self, state: StateModel, ball: StateBall) -> tuple[StateModel, bool]:
         """Overridable state processing after a ball has been dropped."""
-        return state
+        return state, False
