@@ -3,7 +3,7 @@ from dataclasses import replace
 import sys
 sys.path.append("../src/ballsort")
 
-from test_utils import move_ball_by_column, sort_column
+from test_utils import sort_column
 from control_factory import get_control_sim
 from ch7_scenario import Ch7Scenario
 from state_update_model import StateBall, StatePosition

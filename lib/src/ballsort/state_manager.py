@@ -93,8 +93,10 @@ class StateManager:
         return self._check_goal_state(state)
 
     def open_claw_end(self, state: StateModel, claw_index: int) -> StateModel:
-        state.claws[claw_index].operating_claw = False
-        return state
+        droppedBall = next((ball for ball in state.balls if ball.pos == state.claws[claw_index].pos), None)
+        newState = self.scenario.on_ball_dropped(state, droppedBall) if droppedBall and self.scenario else state
+        newState.claws[claw_index].operating_claw = False
+        return newState
 
     def close_claw_end(self, state: StateModel, claw_index: int) -> StateModel:
         state.claws[claw_index].operating_claw = False

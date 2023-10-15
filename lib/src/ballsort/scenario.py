@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from state_update_model import StateModel
+from state_update_model import StateBall, StateModel
 
 @dataclass
 class ScenarioProgress(object):
@@ -34,3 +34,7 @@ class Scenario(object):
     def get_dimensions_description(self) -> str:
         init_state = self.get_initial_state()
         return f"maxX={init_state.max_x}, maxY={init_state.max_y}"
+
+    def on_ball_dropped(self, state: StateModel, ball: StateBall) -> StateModel:
+        """Overridable state processing after a ball has been dropped."""
+        return state

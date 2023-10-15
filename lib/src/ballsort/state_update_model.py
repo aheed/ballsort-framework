@@ -17,6 +17,7 @@ class StateBall:
     color: str
     value: int = 0
     label: str = ""
+    value_visible: bool = True
 
     def __str__(self) -> str:
         return f"{self.color} {self.label}"
