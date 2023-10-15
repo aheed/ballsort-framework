@@ -40,7 +40,7 @@ class Ch7Scenario(Scenario):
         if len(column0) != len(state.balls):
             return False
         
-        actual_values = [ball.value for ball in sorted(state.balls, key=lambda ball: ball.pos.y)]
+        actual_values = [0 if ball.value is None else ball.value for ball in sorted(state.balls, key=lambda ball: ball.pos.y)]
         expected_values = sorted(actual_values)
 
         #print(expected_values, actual_values)

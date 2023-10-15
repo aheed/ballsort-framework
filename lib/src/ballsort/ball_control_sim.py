@@ -110,4 +110,4 @@ class BallControlSim(BallControl, ScenarioControl):
         return self.state_manager.scenario.is_in_goal_state(self.state)
     
     def get_state(self) -> StateModel:
-        return self.state
+        return replace(self.state, balls=[replace(ball, value=ball.value if ball.value_visible else None) for ball in self.state.balls])

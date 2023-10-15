@@ -34,8 +34,8 @@ async def sort_column(bc: BallControl, src_x1: int, src_x2: int, dest_x: int, no
 
         column1: list[StateBall] = [ball for ball in bc.get_state().balls if ball.pos.x == src_x1]
         column2: list[StateBall] = [ball for ball in bc.get_state().balls if ball.pos.x == src_x2]
-        column1_sorted = [ball.value for ball in sorted(column1, key=lambda ball: ball.pos.y)]
-        column2_sorted = [ball.value for ball in sorted(column2, key=lambda ball: ball.pos.y)]
+        column1_sorted = [0 if ball.value is None else ball.value  for ball in sorted(column1, key=lambda ball: ball.pos.y)]
+        column2_sorted = [0 if ball.value is None else ball.value for ball in sorted(column2, key=lambda ball: ball.pos.y)]
 
         if max(column1_sorted, default=-1000) >= max(column2_sorted, default=-1000):
             src_column_index = src_x1

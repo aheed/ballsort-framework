@@ -21,7 +21,7 @@ class Ch9Scenario(Scenario):
         super().__init__(seed=seed)
 
     def get_goal_state_description(self) -> str:
-        return f"All marbles sorted by value in the leftmost column. Lowest value on top."
+        return f"All marbles sorted by value in the leftmost column. Lowest value on top.\nA marble must be dropped on position (4, 6) to reveal its value."
     
     def get_initial_state(self) -> StateModel:
         max_x = 4
@@ -46,7 +46,7 @@ class Ch9Scenario(Scenario):
         if len(column0) != len(state.balls):
             return False
         
-        actual_values = [ball.value for ball in sorted(state.balls, key=lambda ball: ball.pos.y)]
+        actual_values = [0 if ball.value is None else ball.value for ball in sorted(state.balls, key=lambda ball: ball.pos.y)]
         expected_values = sorted(actual_values)
 
         #print(expected_values, actual_values)

@@ -69,12 +69,12 @@ class Ch8Scenario(Scenario):
         if len(column6) != len(state.balls) / 2:
             return False
         
-        actual_col0_values = [ball.value for ball in sorted(column0, key=lambda ball: ball.pos.y)]
+        actual_col0_values = [0 if ball.value is None else ball.value for ball in sorted(column0, key=lambda ball: ball.pos.y)]
         expected_col0_values = sorted(actual_col0_values)
         if actual_col0_values != expected_col0_values:
             return False
         
-        actual_col6_values = [ball.value for ball in sorted(column6, key=lambda ball: ball.pos.y)]
+        actual_col6_values = [0 if ball.value is None else ball.value for ball in sorted(column6, key=lambda ball: ball.pos.y)]
         expected_col6_values = sorted(actual_col6_values)
         if actual_col6_values != expected_col6_values:
             return False

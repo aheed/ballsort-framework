@@ -15,7 +15,7 @@ class StatePosition:
 class StateBall:
     pos: StatePosition
     color: str
-    value: int = 0
+    value: int | None = None
     label: str = ""
     value_visible: bool = True
 
@@ -27,7 +27,7 @@ class Claw:
     pos: StatePosition
     open: bool
     ball_color: str
-    ball_value: int
+    ball_value: int | None
     ball_label: str
     min_x: int
     max_x: int
