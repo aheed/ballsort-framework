@@ -10,7 +10,7 @@ from state_update_model import StatePosition
 
 async def example_solution():
     """Bucket sort solution"""
-    
+
     bc = get_control_sim(0)
     await bc.set_scenario(Ch10Scenario(seed=4711))
 
@@ -34,7 +34,7 @@ async def example_solution():
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
 
 
-def main():
+def test_ch10():
     asyncio.run(example_solution())
 
 
@@ -42,6 +42,6 @@ if __name__ == "__main__":
     import time
 
     s = time.perf_counter()
-    main()
+    test_ch10()
     elapsed = time.perf_counter() - s
     print(f"\n{__file__} executed in {elapsed:0.2f} seconds.")
