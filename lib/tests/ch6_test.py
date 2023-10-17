@@ -9,7 +9,7 @@ from ch6_scenario import Ch6Scenario
 from state_update_model import StateBall, StatePosition
 from ball_control import IllegalBallControlStateError
 
-def test_goal_state():
+def goal_state():
     sc = Ch6Scenario()
 
     state = sc.get_initial_state()
@@ -23,7 +23,7 @@ def test_goal_state():
     state = replace(sc.get_initial_state(), balls=balls)
     assert sc.is_in_goal_state(state) == True
 
-async def test_claw_collision_validation():
+async def claw_collision_validation():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch6Scenario())    
     exception_caught = False
@@ -48,7 +48,7 @@ async def test_claw_collision_validation():
 
     assert(exception_caught)
 
-async def test_claw_0_position_limit():
+async def claw_0_position_limit():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch6Scenario())    
     exception_caught = False
@@ -62,7 +62,7 @@ async def test_claw_0_position_limit():
 
     assert(exception_caught)
 
-async def test_claw_1_position_limit():
+async def claw_1_position_limit():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch6Scenario())    
     exception_caught = False
@@ -119,11 +119,11 @@ async def example_solution_concurrent():
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
 
 
-def main():
-    test_goal_state()
-    asyncio.run(test_claw_collision_validation())
-    asyncio.run(test_claw_0_position_limit())
-    asyncio.run(test_claw_1_position_limit())
+def test_ch6():
+    goal_state()
+    asyncio.run(claw_collision_validation())
+    asyncio.run(claw_0_position_limit())
+    asyncio.run(claw_1_position_limit())
     asyncio.run(example_solution())
     asyncio.run(example_solution_concurrent())
 

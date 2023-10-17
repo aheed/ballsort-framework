@@ -9,7 +9,7 @@ from ch8_scenario import Ch8Scenario
 from state_update_model import StateBall, StatePosition
 from ball_control import IllegalBallControlStateError
 
-def test_goal_state():
+def goal_state():
     sc = Ch8Scenario()
 
     state = sc.get_initial_state()
@@ -32,7 +32,7 @@ def test_goal_state():
     state = replace(sc.get_initial_state(), balls=balls)
     assert sc.is_in_goal_state(state) == True
 
-async def test_claw_0_position_limit():
+async def claw_0_position_limit():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch8Scenario())    
     exception_caught = False
@@ -46,7 +46,7 @@ async def test_claw_0_position_limit():
 
     assert(exception_caught)
 
-async def test_claw_1_position_limit():
+async def claw_1_position_limit():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch8Scenario())
     exception_caught = False
@@ -72,16 +72,16 @@ async def example_solution():
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
 
 
-def main():
-    test_goal_state()
-    asyncio.run(test_claw_0_position_limit())
-    asyncio.run(test_claw_1_position_limit())
+def test_ch8():
+    goal_state()
+    asyncio.run(claw_0_position_limit())
+    asyncio.run(claw_1_position_limit())
     asyncio.run(example_solution())
 
 if __name__ == "__main__":
     import time
 
     s = time.perf_counter()
-    main()
+    test_ch8()
     elapsed = time.perf_counter() - s
     print(f"\n{__file__} executed in {elapsed:0.2f} seconds.")

@@ -10,7 +10,7 @@ from ch3_scenario import Ch3Scenario
 from state_update_model import StateBall, StatePosition
 
 
-def test_goal_state():
+def goal_state():
     sc = Ch3Scenario()
     
     state = sc.get_initial_state()
@@ -61,14 +61,14 @@ async def example_solution():
 
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
 
-def main():
-    test_goal_state()
+def test_ch3():
+    goal_state()
     asyncio.run(example_solution())
 
 if __name__ == "__main__":
     import time
 
     s = time.perf_counter()
-    main()
+    test_ch3()
     elapsed = time.perf_counter() - s
     print(f"\n{__file__} executed in {elapsed:0.3f} seconds.")

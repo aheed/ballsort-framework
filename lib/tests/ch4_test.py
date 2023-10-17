@@ -10,7 +10,7 @@ from ch4_scenario import Ch4Scenario
 from state_update_model import StateBall, StatePosition
 
 
-def test_goal_state():
+def goal_state():
     sc = Ch4Scenario()
     
     state = sc.get_initial_state()
@@ -28,7 +28,7 @@ def test_goal_state():
     state = replace(sc.get_initial_state(), balls=balls)
     assert sc.is_in_goal_state(state) == True
 
-async def test_validation():
+async def validation():
     bc = get_ch4_control_sim(0)
     await bc.set_scenario(Ch4Scenario())
 
@@ -61,17 +61,17 @@ async def example_solution():
 
     await move_tower(height=bc.get_state().max_y + 1, src_x=0, dest_x=2)
 
-    print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
+    
 
-def main():
-    test_goal_state()
-    asyncio.run(test_validation())
+def test_ch4():
+    goal_state()
+    asyncio.run(validation())
     asyncio.run(example_solution())
 
 if __name__ == "__main__":
     import time
 
     s = time.perf_counter()
-    main()
+    test_ch4()
     elapsed = time.perf_counter() - s
     print(f"\n{__file__} executed in {elapsed:0.2f} seconds.")
