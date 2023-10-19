@@ -27,7 +27,7 @@ class Ch12Scenario(Scenario):
     def get_goal_state_description(self) -> str:
         return f"""
         Two marbles in each of columns 1,2,3. Each marble shall have a value matching the column index.
-        Initially you do not know the marble values, only their colors. Each color is associated with an initially unknown random integer value the range [1, 3].
+        Initially you do not know the marble values, only their colors. Each color is associated with an initially unknown random integer value in the range [1, 3].
         A marble must be dropped on position ({self.max_x}, {self.max_y}) to reveal its value, and thereby the value of all marbles of the same color.
         Claw 0 can operate in columns 0-3. Claw 1 can operate in columns 4-{self.max_x}.
         {self.get_dimensions_description()}"""
