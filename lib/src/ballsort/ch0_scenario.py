@@ -30,7 +30,7 @@ class Ch0Scenario(Scenario):
             columns[ball.pos.x].append(ball)
 
         # No ball in claw
-        if state.claws[0].ball_color:
+        if state.claws[0].ball:
             return False
 
         # 3 balls in leftmost column

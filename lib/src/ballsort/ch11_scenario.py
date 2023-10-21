@@ -100,7 +100,7 @@ Claw 0 can operate in columns 0-{self.max_x//2}. Claw 1 can operate in columns {
 
     def is_in_goal_state(self, state: StateModel) -> bool:
         # No ball in claw
-        if state.claws[0].ball_color:
+        if state.claws[0].ball:
             return False
 
         return self._is_column_in_goal_state(

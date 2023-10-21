@@ -31,7 +31,7 @@ class Ch1Scenario(Scenario):
             columns[ball.pos.x].append(ball)
 
         # No ball in claw
-        if state.claws[0].ball_color:
+        if state.claws[0].ball:
             return False
 
         # number of non-empty columns shall be 2

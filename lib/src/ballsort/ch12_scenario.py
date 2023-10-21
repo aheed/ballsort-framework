@@ -88,7 +88,7 @@ class Ch12Scenario(Scenario):
     def is_in_goal_state(self, state: StateModel) -> bool:
         
         # No ball in claw
-        if state.claws[0].ball_color:
+        if state.claws[0].ball:
             return False
         
         return next((False for ball in state.balls if ball.pos.x < 4 and ball.pos.x != ball.value), True)

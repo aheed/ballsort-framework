@@ -1,9 +1,8 @@
 from dataclasses import dataclass, replace
 from scenario import Scenario
-from state_utils import get_ball_at_current_pos, is_ball_in_claw
+from state_utils import get_ball_at_current_pos
 from state_validator import StateValidator
 from state_update_model import (
-    StateBall,
     StateModel,
     StatePosition,
 )
@@ -66,13 +65,14 @@ class StateManager:
         state.claws[claw_index].operating_claw = True
         state.claws[claw_index].open = True
         #print(f"opening claw")
-        if not is_ball_in_claw(state, claw_index=claw_index):
+        
+        ball_in_claw = state.claws[claw_index].ball
+        if ball_in_claw is None:
             return state
+        
         print(f"dropping at {state.claws[claw_index].pos}")
-        newBall = StateBall(pos=state.claws[claw_index].pos, color=state.claws[claw_index].ball_color, value=state.claws[claw_index].ball_value, label=state.claws[claw_index].ball_label)
-        state.claws[claw_index].ball_color = ""
-        state.claws[claw_index].ball_value = 0 #not strictly necessary
-        state.claws[claw_index].ball_label = "" #not strictly necessary
+        newBall = replace(ball_in_claw, pos = state.claws[claw_index].pos)
+        state.claws[claw_index].ball = None
         state.balls.append(newBall)
         return self._check_goal_state(state)
 
@@ -85,9 +85,7 @@ class StateManager:
         if not ball_to_grab:
             return state
         print(f"grabbing {ball_to_grab} at {state.claws[claw_index].pos}")
-        state.claws[claw_index].ball_color = ball_to_grab.color
-        state.claws[claw_index].ball_value = ball_to_grab.value
-        state.claws[claw_index].ball_label = ball_to_grab.label
+        state.claws[claw_index].ball = ball_to_grab
         #remove ball from list
         state.balls = [ball for ball in state.balls if ball.pos != ball_to_grab.pos]
         return self._check_goal_state(state)
