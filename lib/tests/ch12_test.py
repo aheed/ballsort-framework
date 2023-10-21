@@ -7,12 +7,14 @@ from test_utils import move_ball_by_column
 from control_factory import get_control_sim
 from ch12_scenario import Ch12Scenario
 from state_update_model import StatePosition
-from ball_control_sim import BallControlSim
+from ball_control import BallControl
 
-color_to_x: dict[str, int] = {}
-color_to_event: dict[str, asyncio.Event] = {}
 
-async def reveal_color_values(bc: BallControlSim):
+async def reveal_color_values(
+    bc: BallControl,
+    color_to_x: dict[str, int],
+    color_to_event: dict[str, asyncio.Event],
+):
     """reveal all color values with claw 1"""
 
     nof_balls = 6  # to reveal
@@ -41,7 +43,11 @@ async def reveal_color_values(bc: BallControlSim):
         await move_ball_by_column(bc=bc, src_x=reveal_x, dest_x=scrap_x, claw_index=1)
 
 
-async def sort_into_buckets(bc: BallControlSim):
+async def sort_into_buckets(
+    bc: BallControl,
+    color_to_x: dict[str, int],
+    color_to_event: dict[str, asyncio.Event],
+):
     """sort into buckets with claw 0"""
 
     nof_balls = 6  # to sort into buckets
@@ -65,8 +71,11 @@ async def example_solution():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch12Scenario(seed=3345))
 
-    await reveal_color_values(bc)
-    await sort_into_buckets(bc)
+    color_to_x: dict[str, int] = {}
+    color_to_event: dict[str, asyncio.Event] = {}
+
+    await reveal_color_values(bc=bc, color_to_x=color_to_x, color_to_event=color_to_event)
+    await sort_into_buckets(bc=bc, color_to_x=color_to_x, color_to_event=color_to_event)
 
     assert bc.get_state().goal_accomplished
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
@@ -76,12 +85,21 @@ async def example_solution_concurrent():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch12Scenario(seed=6587))
 
+    color_to_x: dict[str, int] = {}
+    color_to_event: dict[str, asyncio.Event] = {}
+
     # create an event for each color
     for color in [ball.color for ball in bc.get_state().balls if ball.pos.x == 0]:
         if color_to_event.get(color) == None:
             color_to_event[color] = asyncio.Event()
 
-    await asyncio.gather(reveal_color_values(bc), sort_into_buckets(bc))
+    # sort and decode concurrently
+    await asyncio.gather(
+        reveal_color_values(
+            bc=bc, color_to_x=color_to_x, color_to_event=color_to_event
+        ),
+        sort_into_buckets(bc=bc, color_to_x=color_to_x, color_to_event=color_to_event),
+    )
 
     assert bc.get_state().goal_accomplished
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
