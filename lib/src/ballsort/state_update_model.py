@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import ClassVar
 
 MIN_X = 0
 MIN_Y = 0
@@ -11,13 +12,27 @@ class StatePosition:
     def __str__(self) -> str:
         return f"x={self.x} y={self.y}"
 
+
 @dataclass
 class StateBall:
+    __id_cnt: ClassVar[int] = 0
     pos: StatePosition
     color: str
     value: int | None = None
-    label: str = ""
+    label: str = ""    
     value_visible: bool = True
+    id: str = "" # always overwritten in __post_init__
+
+    @classmethod
+    def __create_unique_id(cls) -> str:
+        cls.__id_cnt = cls.__id_cnt + 1
+        return f"{cls.__id_cnt}"
+
+    def __post_init__(self):
+        if self.id == "":
+            self.id = self.__create_unique_id()
+        print("ball created: ", self, self.id)
+
 
     def __str__(self) -> str:
         return f"{self.color} {self.label}"
