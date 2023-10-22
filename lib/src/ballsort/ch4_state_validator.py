@@ -16,7 +16,8 @@ class Ch4StateValidator(StateValidator):
     def open_claw(self, state: StateModel, claw_index: int):
         super().open_claw(state=state, claw_index=claw_index)
 
-        if not is_ball_in_claw(state, claw_index=claw_index):
+        ball_in_claw = state.claws[claw_index].ball
+        if not ball_in_claw:
             return
 
         if state.claws[claw_index].pos.y == state.max_y:
@@ -34,7 +35,7 @@ class Ch4StateValidator(StateValidator):
             return
 
         # check for values of balls
-        if ball_below.value < state.claws[claw_index].ball_value:
+        if ball_in_claw.value is not None and ball_below.value is not None and ball_below.value < ball_in_claw.value:
             raise IllegalBallControlStateError(
-                f"Marble (value={state.claws[claw_index].ball_value})dropped on top of lower value ({ball_below.value}) marble"
+                f"Marble (value={ball_in_claw.value})dropped on top of lower value ({ball_below.value}) marble"
             )

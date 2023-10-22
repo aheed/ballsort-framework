@@ -6,7 +6,7 @@ from state_update_model import (
 
 
 def is_ball_in_claw(state: StateModel, claw_index: int) -> bool:
-    return not not state.claws[claw_index].ball_color
+    return state.claws[claw_index].ball is not None
 
 
 def is_ball_at_current_pos(state: StateModel, claw_index: int) -> bool:
