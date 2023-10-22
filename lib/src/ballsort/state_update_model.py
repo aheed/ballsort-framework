@@ -31,8 +31,6 @@ class StateBall:
     def __post_init__(self):
         if self.id == "":
             self.id = self.__create_unique_id()
-        print("ball created: ", self, self.id)
-
 
     def __str__(self) -> str:
         return f"{self.color} {self.label}"
