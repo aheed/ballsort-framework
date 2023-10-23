@@ -3,7 +3,7 @@ import sys
 
 sys.path.append("../src/ballsort")
 
-from test_utils import move_ball_by_column
+from test_utils import get_column_top_occupied_pos, get_column_top_vacant_pos, go_to_pos, move_ball_by_column
 from control_factory import get_control_sim
 from ch12_scenario import Ch12Scenario
 from state_update_model import StatePosition
@@ -50,6 +50,7 @@ async def sort_into_buckets(
 ):
     """sort into buckets with claw 0"""
 
+    claw_index = 0
     nof_balls = 6  # to sort into buckets
     right_src_x = 0
     max_y = bc.get_state().max_y
@@ -60,16 +61,19 @@ async def sort_into_buckets(
             for ball in bc.get_state().balls
             if ball.pos == StatePosition(x=right_src_x, y=y)
         )
+        
+        await go_to_pos(bc=bc, dest=get_column_top_occupied_pos(bc=bc, x=right_src_x), open_claw=True, claw_index=claw_index)
+        await bc.close_claw(claw_index=claw_index)
         ev = color_to_event.get(color)
         if ev:
             await ev.wait()
         dest_x = color_to_x[color]
-        await move_ball_by_column(bc=bc, src_x=right_src_x, dest_x=dest_x, claw_index=0)
-
+        await go_to_pos(bc=bc, dest=get_column_top_vacant_pos(bc=bc, x=dest_x), open_claw=False, claw_index=claw_index)
+        await bc.open_claw(claw_index=claw_index)
 
 async def example_solution():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch12Scenario(seed=3345))
+    await bc.set_scenario(Ch12Scenario(seed=3347))
 
     color_to_x: dict[str, int] = {}
     color_to_event: dict[str, asyncio.Event] = {}
@@ -83,7 +87,7 @@ async def example_solution():
 
 async def example_solution_concurrent():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch12Scenario(seed=6587))
+    await bc.set_scenario(Ch12Scenario(seed=6588))
 
     color_to_x: dict[str, int] = {}
     color_to_event: dict[str, asyncio.Event] = {}
