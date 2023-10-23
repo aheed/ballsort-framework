@@ -70,7 +70,7 @@ class StateManager:
         if ball_in_claw is None:
             return state
         
-        print(f"dropping at {state.claws[claw_index].pos}")
+        print(f"{claw_index} dropping {ball_in_claw} at {state.claws[claw_index].pos}")
         newBall = replace(ball_in_claw, pos = state.claws[claw_index].pos)
         state.claws[claw_index].ball = None
         state.balls.append(newBall)
@@ -84,7 +84,7 @@ class StateManager:
         ball_to_grab = get_ball_at_current_pos(state, claw_index=claw_index)
         if not ball_to_grab:
             return state
-        print(f"grabbing {ball_to_grab} at {state.claws[claw_index].pos}")
+        print(f"{claw_index} grabbing {ball_to_grab} at {state.claws[claw_index].pos}")
         state.claws[claw_index].ball = ball_to_grab
         #remove ball from list
         state.balls = [ball for ball in state.balls if ball.pos != ball_to_grab.pos]
