@@ -14,6 +14,7 @@ async def reveal_color_values(
     bc: BallControl,
     color_to_x: dict[str, int],
     color_to_event: dict[str, asyncio.Event],
+    goal_nof_colors: int
 ):
     """reveal all color values with claw 1"""
 
@@ -38,7 +39,8 @@ async def reveal_color_values(
         ev = color_to_event.get(revealed_ball.color)
         if ev:
             ev.set()
-
+        if len(color_to_x) >= goal_nof_colors:
+            break
         # move to scrap heap column
         await move_ball_by_column(bc=bc, src_x=reveal_x, dest_x=scrap_x, claw_index=1)
 
@@ -73,12 +75,12 @@ async def sort_into_buckets(
 
 async def example_solution():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch12Scenario(seed=3347))
+    await bc.set_scenario(Ch12Scenario(seed=6589))
 
     color_to_x: dict[str, int] = {}
     color_to_event: dict[str, asyncio.Event] = {}
 
-    await reveal_color_values(bc=bc, color_to_x=color_to_x, color_to_event=color_to_event)
+    await reveal_color_values(bc=bc, color_to_x=color_to_x, color_to_event=color_to_event, goal_nof_colors=3)
     await sort_into_buckets(bc=bc, color_to_x=color_to_x, color_to_event=color_to_event)
 
     assert bc.get_state().goal_accomplished
@@ -87,7 +89,7 @@ async def example_solution():
 
 async def example_solution_concurrent():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch12Scenario(seed=6588))
+    await bc.set_scenario(Ch12Scenario(seed=6589))
 
     color_to_x: dict[str, int] = {}
     color_to_event: dict[str, asyncio.Event] = {}
@@ -100,7 +102,7 @@ async def example_solution_concurrent():
     # sort and decode concurrently
     await asyncio.gather(
         reveal_color_values(
-            bc=bc, color_to_x=color_to_x, color_to_event=color_to_event
+            bc=bc, color_to_x=color_to_x, color_to_event=color_to_event, goal_nof_colors=3
         ),
         sort_into_buckets(bc=bc, color_to_x=color_to_x, color_to_event=color_to_event),
     )
