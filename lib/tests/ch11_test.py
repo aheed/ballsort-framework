@@ -3,7 +3,7 @@ import sys
 
 sys.path.append("../src/ballsort")
 
-from test_utils import move_ball_by_column
+from test_utils import get_column_top_occupied_pos, get_column_top_vacant_pos, go_to_pos, move_ball_by_column
 from control_factory import get_control_sim
 from ch11_scenario import Ch11Scenario
 from state_update_model import StatePosition
@@ -22,10 +22,11 @@ async def bucket_sort(
 
     # reveal each ball's value by moving it to the revealer spot. Then move it to bucket column.
     for _ in range(len(bc.get_state().balls) // 2):
+        await go_to_pos(bc=bc, dest=get_column_top_occupied_pos(bc=bc, x=dest_x), open_claw=True, claw_index=claw_index)
+        await bc.close_claw(claw_index=claw_index)
         async with lock:
-            await move_ball_by_column(
-                bc=bc, src_x=dest_x, dest_x=reveal_spot_x, claw_index=claw_index
-            )  # reveal
+            await go_to_pos(bc=bc, dest=StatePosition(x=reveal_spot_x, y=reveal_spot_y), open_claw=False, claw_index=claw_index)
+            await bc.open_claw(claw_index=claw_index) # drop should reveal value
             revealed_value = next(
                 (
                     ball.value
@@ -35,12 +36,10 @@ async def bucket_sort(
                 None,
             )
             assert revealed_value
-            await move_ball_by_column(
-                bc=bc,
-                src_x=reveal_spot_x,
-                dest_x=bucket_offset + revealed_value,
-                claw_index=claw_index,
-            )  # move to column corresponding to value
+            await bc.close_claw(claw_index=claw_index)
+            go_to_bucket_coroutine = go_to_pos(bc=bc, dest=get_column_top_vacant_pos(bc=bc, x=bucket_offset + revealed_value), open_claw=False, claw_index=claw_index)
+        await go_to_bucket_coroutine
+        await bc.open_claw(claw_index=claw_index)
 
     # Finally move all buckets to destination column in the correct order
     for x in range(bucket_offset + 3, bucket_offset + 0, -1):
