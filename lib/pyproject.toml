@@ -1,6 +1,6 @@
 [project]
 name = "ballsort"
-version = "1.0.4"
+version = "1.0.9"
 authors = [
   { name="Anders Heed", email="aheed88888@gmail.com" },
 ]
