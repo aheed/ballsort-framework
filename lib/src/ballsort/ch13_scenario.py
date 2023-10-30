@@ -1,5 +1,6 @@
 from dataclasses import dataclass, replace
 import random
+from ball_control import IllegalBallControlStateError
 from scenario import Scenario
 from state_update_model import (
     StateBall,
@@ -15,8 +16,8 @@ class Ch13Scenario(Scenario):
 
     max_x = 7
     max_y = 3
-    #colors = ["lightblue", "pink", "lightgreen", "lightyellow", "gray"]
-    nof_colors = 5 #0-4
+    colors = ["lightblue", "pink", "lightgreen", "lightyellow", "gray"]
+    nof_colors = 5  # 0-4
 
     def __init__(self, seed: int | None = None):
         super().__init__(seed=seed)
@@ -33,7 +34,9 @@ class Ch13Scenario(Scenario):
         rows = self.max_y + 1
 
         def __create_random_ball_list(nof_empty_columns: int):
-            color_bag = [color for color in range(self.nof_colors) for _ in range(self.max_y + 1)]
+            color_bag = [
+                color for color in range(self.nof_colors) for _ in range(self.max_y + 1)
+            ]
             return random.sample(color_bag, len(color_bag)) + [
                 self.nof_colors for _ in range(nof_empty_columns * rows)
             ]
@@ -41,7 +44,7 @@ class Ch13Scenario(Scenario):
         # ball_list = __create_random_ball_list(nof_empty_columns=2)
 
         def __get_ball_index(x: int, y: int) -> int:
-            return y * rows + x
+            return x * rows + y
 
         def __get_color(balls: list[int], x: int, y: int) -> int:
             return balls[__get_ball_index(x=x, y=y)]
@@ -56,7 +59,7 @@ class Ch13Scenario(Scenario):
             columns = __get_columns(balls=balls)
             return next((False for column in columns if len(set(column)) != 1), True)
 
-        #def __get_top_by_column(column: list[str]) -> tuple[str, int]:
+        # def __get_top_by_column(column: list[str]) -> tuple[str, int]:
         #    src_y = -1
         #    src_color = empty_color
         #    for y in range(self.max_y + 1):
@@ -104,33 +107,47 @@ class Ch13Scenario(Scenario):
                 move for move in all_moves if __is_move_legal(balls=balls, move=move)
             ]
             return legal_moves
-        
-        def __get_zobrist_index_old(x: int, y:int, color: int) -> int:
-            return color * (self.max_x+1) * (self.max_y+1) + y * (self.max_x+1) + x
-        
+
+        def __get_zobrist_index_old(x: int, y: int, color: int) -> int:
+            return (
+                color * (self.max_x + 1) * (self.max_y + 1) + y * (self.max_x + 1) + x
+            )
+
         def __get_zobrist_index(ball_index: int, color: int) -> int:
             return ball_index * (self.nof_colors) + color
-        
+
         zobrist_dict: dict[int, int] = {}
-        for x in range(self.max_x+1):
-            for y in range(self.max_y+1):
+        for x in range(self.max_x + 1):
+            for y in range(self.max_y + 1):
                 for color in range(self.nof_colors):
-                    zobrist_dict[__get_zobrist_index(ball_index=__get_ball_index(x=x, y=y), color=color)] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
-        #for x in range(self.max_x+1):
+                    zobrist_dict[
+                        __get_zobrist_index(
+                            ball_index=__get_ball_index(x=x, y=y), color=color
+                        )
+                    ] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
+        # for x in range(self.max_x+1):
         #    for y in range(self.max_y+1):
         #        for color in range(self.nof_colors):
         #            zobrist_dict[__get_zobrist_index(x=x, y=y, color=color)] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
 
         def __calc_hash(balls: list[int]) -> int:
             hash = 0
-            for x in range(self.max_x+1):
-                for y in range(self.max_y+1):
+            for x in range(self.max_x + 1):
+                for y in range(self.max_y + 1):
                     ball_index = __get_ball_index(x=x, y=y)
-                    hash = hash ^ zobrist_dict[__get_zobrist_index(ball_index=ball_index, color=balls[ball_index])]
+                    hash = (
+                        hash
+                        ^ zobrist_dict[
+                            __get_zobrist_index(
+                                ball_index=ball_index, color=balls[ball_index]
+                            )
+                        ]
+                    )
             return hash
 
-        def __is_winnable(balls: list[int], previous_positions: set[int], position_hash: int) -> bool:
-                        
+        def __is_winnable(
+            balls: list[int], previous_positions: set[int], position_hash: int
+        ) -> bool:
             if __is_in_goal_state(balls=balls):
                 return True
 
@@ -145,7 +162,7 @@ class Ch13Scenario(Scenario):
                 post_move_state[dest_index] = balls[src_index]
                 post_move_state[src_index] = self.nof_colors
 
-                #new_position_hash = __calc_hash_incrementally(start_hash=position_hash, move=move)
+                # new_position_hash = __calc_hash_incrementally(start_hash=position_hash, move=move)
                 new_position_hash = __calc_hash(balls=post_move_state)
 
                 if position_hash not in previous_positions:
@@ -154,41 +171,42 @@ class Ch13Scenario(Scenario):
                     if __is_winnable(
                         balls=post_move_state,
                         previous_positions=all_positions,
-                        position_hash=new_position_hash
+                        position_hash=new_position_hash,
                     ):
                         return True
+                else:
+                    print("Position has been evaluated before. Skip.")
 
             return False
 
         def __is_starting_position_winnable(balls: list[int]) -> bool:
             hash = __calc_hash(balls=balls)
-            return __is_winnable(balls=balls, previous_positions=set(), position_hash=hash)
-
-        ball_colors = __create_random_ball_list(nof_empty_columns=2)
-        while not __is_starting_position_winnable(balls=ball_colors):
-            print("unwinnable starting position. Trying again.")
-            ball_colors = __create_random_ball_list(nof_empty_columns=2)
-
-        ###
-
-        nof_balls = 2 * self.nof_colors
-        values = random.sample(range(1, self.nof_colors + 1), self.nof_colors)
-        min_y = self.max_y + 1 - nof_balls
-        left_y = random.sample(range(min_y, self.max_y + 1), nof_balls)
-
-        ball_colors = [
-            StateBall(
-                pos=StatePosition(x=0, y=left_y[i]),
-                color=self.colors[i % self.nof_colors],
-                value=values[i % self.nof_colors],
-                label="?",
-                value_visible=False,
+            return __is_winnable(
+                balls=balls, previous_positions=set(), position_hash=hash
             )
-            for i in range(nof_balls)
+
+        coordinates = __create_random_ball_list(nof_empty_columns=2)
+        while not __is_starting_position_winnable(balls=coordinates):
+            print("unwinnable starting position. Trying again.")
+            coordinates = __create_random_ball_list(nof_empty_columns=2)
+
+        def __get_state_position_by_ball_index(ball_index: int) -> StatePosition:
+            x = ball_index // rows
+            y = ball_index % rows
+            assert __get_ball_index(x=x, y=y) == ball_index
+            return StatePosition(x=x, y=y)
+
+        balls = [
+            StateBall(
+                pos=__get_state_position_by_ball_index(ball_index),
+                color=self.colors[coordinates[ball_index]],
+            )
+            for ball_index in range(len(coordinates))
+            if coordinates[ball_index] != self.nof_colors
         ]
 
         return replace(
-            get_default_state(), balls=ball_colors, max_x=self.max_x, max_y=self.max_y
+            get_default_state(), balls=balls, max_x=self.max_x, max_y=self.max_y
         )
 
     def is_in_goal_state(self, state: StateModel) -> bool:
@@ -196,17 +214,23 @@ class Ch13Scenario(Scenario):
         if state.claws[0].ball:
             return False
 
-        return next(
-            (
-                False
-                for ball in state.balls
-                if ball.pos.x < 4 and ball.pos.x != ball.value
-            ),
-            True,
-        )
+        columns: list[list[StateBall]] = [[] for _ in range(state.max_x + 1)]
+        for ball in state.balls:
+            columns[ball.pos.x].append(ball)
+
+        # No more than one color per column
+        return next((False for column in columns if len(set([ball.color for ball in column])) > 1), True)
 
     def on_ball_dropped(
         self, state: StateModel, ball: StateBall
     ) -> tuple[StateModel, bool]:
         """Override"""
-        return self.reveal_action.on_ball_dropped(state=state, ball=ball)
+        ball_below_dropped = next((bball for bball in state.balls if bball.pos == StatePosition(x=ball.pos.x, y=ball.pos.y+1)), None)
+        if ball_below_dropped is None:
+            return (state, False)
+        
+        if ball_below_dropped.color != ball.color:
+            raise IllegalBallControlStateError(f"Ball ({ball.color}) dropped on top of ball of different color ({ball_below_dropped.color})")
+
+        return (state, False)
+    
