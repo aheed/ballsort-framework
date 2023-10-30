@@ -14,10 +14,14 @@ from state_update_model import (
 class Ch13Scenario(Scenario):
     """Challenge Implementation"""
 
-    max_x = 7
+    max_x = 3 #6
     max_y = 3
     colors = ["lightblue", "pink", "lightgreen", "lightyellow", "gray"]
-    nof_colors = 5  # 0-4
+    nof_colors = 2 # 5  # 0-4
+
+    # debug
+    repeat_positions = 0
+    start_positions = 0
 
     def __init__(self, seed: int | None = None):
         super().__init__(seed=seed)
@@ -26,25 +30,28 @@ class Ch13Scenario(Scenario):
         return f"""
         Only marbles of a single color in any column. 
         A marble can not be dropped on top of a marble of different color.
-        {self.get_dimensions_description()}"""
+        maxX={self.max_x}, maxY={self.max_y}"""
 
     def get_initial_state(self) -> StateModel:
         random.seed(self._seed)
 
-        rows = self.max_y + 1
+        nof_rows = self.max_y + 1
+        nof_columns = self.max_x + 1        
 
-        def __create_random_ball_list(nof_empty_columns: int):
+        def __create_random_ball_list():
+            nof_empty_columns = nof_columns - self.nof_colors
+
             color_bag = [
                 color for color in range(self.nof_colors) for _ in range(self.max_y + 1)
             ]
             return random.sample(color_bag, len(color_bag)) + [
-                self.nof_colors for _ in range(nof_empty_columns * rows)
+                self.nof_colors for _ in range(nof_empty_columns * nof_rows)
             ]
 
         # ball_list = __create_random_ball_list(nof_empty_columns=2)
 
         def __get_ball_index(x: int, y: int) -> int:
-            return x * rows + y
+            return x * nof_rows + y
 
         def __get_color(balls: list[int], x: int, y: int) -> int:
             return balls[__get_ball_index(x=x, y=y)]
@@ -119,7 +126,7 @@ class Ch13Scenario(Scenario):
         zobrist_dict: dict[int, int] = {}
         for x in range(self.max_x + 1):
             for y in range(self.max_y + 1):
-                for color in range(self.nof_colors):
+                for color in range(self.nof_colors + 1): # +1 for the no color (no ball) case
                     zobrist_dict[
                         __get_zobrist_index(
                             ball_index=__get_ball_index(x=x, y=y), color=color
@@ -175,7 +182,8 @@ class Ch13Scenario(Scenario):
                     ):
                         return True
                 else:
-                    print("Position has been evaluated before. Skip.")
+                    #print("Position has been evaluated before. Skip.")
+                    self.repeat_positions = self.repeat_positions + 1
 
             return False
 
@@ -185,14 +193,18 @@ class Ch13Scenario(Scenario):
                 balls=balls, previous_positions=set(), position_hash=hash
             )
 
-        coordinates = __create_random_ball_list(nof_empty_columns=2)
+        coordinates = __create_random_ball_list()
+        print(coordinates, len(coordinates))
         while not __is_starting_position_winnable(balls=coordinates):
-            print("unwinnable starting position. Trying again.")
-            coordinates = __create_random_ball_list(nof_empty_columns=2)
+            #print("unwinnable starting position. Trying again.")
+            self.start_positions = self.start_positions + 1
+            coordinates = __create_random_ball_list()
+
+        print(f"winnable position found.\nTotal repeat positions: {self.repeat_positions}\nStarting positions evaluated: {self.start_positions}")
 
         def __get_state_position_by_ball_index(ball_index: int) -> StatePosition:
-            x = ball_index // rows
-            y = ball_index % rows
+            x = ball_index // nof_rows
+            y = ball_index % nof_rows
             assert __get_ball_index(x=x, y=y) == ball_index
             return StatePosition(x=x, y=y)
 
