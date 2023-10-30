@@ -48,9 +48,11 @@ class Ch13Scenario(Scenario):
                 self.nof_colors for _ in range(nof_empty_columns * nof_rows)
             ]
 
-        # ball_list = __create_random_ball_list(nof_empty_columns=2)
-
         def __get_ball_index(x: int, y: int) -> int:
+            assert(x >= 0)
+            assert(x <= self.max_x)
+            assert(y >= 0)
+            assert(y <= self.max_y)
             return x * nof_rows + y
 
         def __get_color(balls: list[int], x: int, y: int) -> int:
@@ -66,30 +68,18 @@ class Ch13Scenario(Scenario):
             columns = __get_columns(balls=balls)
             return next((False for column in columns if len(set(column)) != 1), True)
 
-        # def __get_top_by_column(column: list[str]) -> tuple[str, int]:
-        #    src_y = -1
-        #    src_color = empty_color
-        #    for y in range(self.max_y + 1):
-        #        if column[y] != empty_color:
-        #            src_y = y
-        #            src_color = column[y]
-        #            break
-        #    return (src_color, src_y)
-
         def __get_top_index(balls: list[int], x: int) -> int:
-            src_y = self.max_y + 1
+            ret = self.max_y + 1
             for y in range(self.max_y + 1):
                 if __get_color(balls=balls, x=x, y=y) != self.nof_colors:
-                    src_y = y
+                    ret = y
                     break
-            return src_y
-
-            # return next((color for color in column if color != empty_color), empty_color)
+            return ret
 
         def __is_move_legal(balls: list[int], move: tuple[int, int]) -> bool:
             src_x, dest_x = move
             src_y = __get_top_index(balls=balls, x=src_x)
-            if src_y < 0:
+            if src_y > self.max_y:
                 return False  # source column is empty. Not legal.
 
             dest_col_top_y = __get_top_index(balls=balls, x=dest_x)
@@ -115,11 +105,6 @@ class Ch13Scenario(Scenario):
             ]
             return legal_moves
 
-        def __get_zobrist_index_old(x: int, y: int, color: int) -> int:
-            return (
-                color * (self.max_x + 1) * (self.max_y + 1) + y * (self.max_x + 1) + x
-            )
-
         def __get_zobrist_index(ball_index: int, color: int) -> int:
             return ball_index * (self.nof_colors) + color
 
@@ -132,10 +117,6 @@ class Ch13Scenario(Scenario):
                             ball_index=__get_ball_index(x=x, y=y), color=color
                         )
                     ] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
-        # for x in range(self.max_x+1):
-        #    for y in range(self.max_y+1):
-        #        for color in range(self.nof_colors):
-        #            zobrist_dict[__get_zobrist_index(x=x, y=y, color=color)] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
 
         def __calc_hash(balls: list[int]) -> int:
             hash = 0
@@ -151,23 +132,76 @@ class Ch13Scenario(Scenario):
                         ]
                     )
             return hash
+        
+        def __make_move(balls: list[int], src_x: int, dest_x: int) -> list[int]:
+            src_y = __get_top_index(balls=balls, x=src_x)
+            dest_y = __get_top_index(balls=balls, x=dest_x) - 1
+            src_index = __get_ball_index(x=src_x, y=src_y)
+            dest_index = __get_ball_index(x=dest_x, y=dest_y)
+            post_move_state = balls.copy()
+            post_move_state[dest_index] = balls[src_index]
+            post_move_state[src_index] = self.nof_colors
+            return post_move_state
+        
+        def __create_winnable_random_ball_list() -> list[int]:
+            nof_empty_columns = nof_columns - self.nof_colors
+
+            # create goal state with color==x in the leftmost columns, empty columns on the right
+            full_columns = [ball_index // nof_rows for ball_index in range(self.nof_colors * nof_rows)]
+            empty_columns = [self.nof_colors for _ in range(nof_empty_columns * nof_rows)]
+            balls = full_columns + empty_columns
+
+            def __is_legal_src_x(src_x: int) -> bool:
+                src_y = __get_top_index(balls=balls, x=src_x)
+                if src_y > self.max_y:
+                    return False  # source column is empty. Not legal.
+                
+                if src_y == self.max_y:
+                    return True # only one ball in the column. Legal.
+                
+                # only legal if the ball directly below is the same color
+                return balls[__get_ball_index(x=src_x, y=src_y)] == balls[__get_ball_index(x=src_x, y=src_y + 1)]
+
+            def __is_legal_dest_x(src_x: int, dest_x: int) -> bool:
+                if src_x == dest_x:
+                    return False # Move to the same column. Not legal.
+                
+                dest_col_top_y = __get_top_index(balls=balls, x=dest_x)
+                if dest_col_top_y == 0:
+                    return False  # destination column is full. Not Legal.
+                
+                return True
+        
+            # make a lot of random backward moves
+            nof_moves = 500
+            actual_moves = 0
+            for _ in range(nof_moves):
+                src_x = random.randint(0, self.max_x)
+                if not __is_legal_src_x(src_x=src_x):
+                    continue
+                dest_x = random.randint(0, self.max_x)
+                if not __is_legal_dest_x(src_x=src_x, dest_x=dest_x):
+                    continue
+
+                balls = __make_move(balls=balls, src_x=src_x, dest_x=dest_x)
+                #print("new ball list: ", balls)
+                actual_moves = actual_moves + 1
+                #print("made a random shuffling move")
+            print(f"made {actual_moves} random shuffling moves")
+            return balls
 
         def __is_winnable(
             balls: list[int], previous_positions: set[int], position_hash: int
         ) -> bool:
             if __is_in_goal_state(balls=balls):
+                print(balls)
                 return True
 
             # try candidates
             for move in __get_legal_moves(balls=balls):
                 src_x, dest_x = move
-                src_y = __get_top_index(balls=balls, x=src_x)
-                dest_y = min(__get_top_index(balls=balls, x=dest_x), self.max_y)
-                src_index = __get_ball_index(x=src_x, y=src_y)
-                dest_index = __get_ball_index(x=dest_x, y=dest_y)
-                post_move_state = balls.copy()
-                post_move_state[dest_index] = balls[src_index]
-                post_move_state[src_index] = self.nof_colors
+
+                post_move_state = __make_move(balls=balls, src_x=src_x, dest_x=dest_x)
 
                 # new_position_hash = __calc_hash_incrementally(start_hash=position_hash, move=move)
                 new_position_hash = __calc_hash(balls=post_move_state)
@@ -193,12 +227,14 @@ class Ch13Scenario(Scenario):
                 balls=balls, previous_positions=set(), position_hash=hash
             )
 
-        coordinates = __create_random_ball_list()
+        #coordinates = __create_random_ball_list()
+        coordinates = __create_winnable_random_ball_list()
         print(coordinates, len(coordinates))
         while not __is_starting_position_winnable(balls=coordinates):
             #print("unwinnable starting position. Trying again.")
             self.start_positions = self.start_positions + 1
-            coordinates = __create_random_ball_list()
+            #coordinates = __create_random_ball_list()
+            raise ValueError("should not happen!")
 
         print(f"winnable position found.\nTotal repeat positions: {self.repeat_positions}\nStarting positions evaluated: {self.start_positions}")
 
