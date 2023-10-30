@@ -14,10 +14,10 @@ from state_update_model import (
 class Ch13Scenario(Scenario):
     """Challenge Implementation"""
 
-    max_x = 3 #6
+    max_x = 6
     max_y = 3
     colors = ["lightblue", "pink", "lightgreen", "lightyellow", "gray"]
-    nof_colors = 2 # 5  # 0-4
+    nof_colors = 5  # 0-4
 
     # debug
     repeat_positions = 0
@@ -206,7 +206,7 @@ class Ch13Scenario(Scenario):
                 # new_position_hash = __calc_hash_incrementally(start_hash=position_hash, move=move)
                 new_position_hash = __calc_hash(balls=post_move_state)
 
-                if position_hash not in previous_positions:
+                if new_position_hash not in previous_positions:
                     all_positions = previous_positions.union({new_position_hash})
 
                     if __is_winnable(
