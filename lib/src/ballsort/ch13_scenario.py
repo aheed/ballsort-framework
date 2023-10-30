@@ -96,8 +96,8 @@ class Ch13Scenario(Scenario):
         def __get_legal_moves(balls: list[int]) -> list[tuple[int, int]]:
             all_moves = [
                 (src_col, dest_col)
-                for src_col in range(self.max_x)
-                for dest_col in range(self.max_x)
+                for src_col in range(nof_columns)
+                for dest_col in range(nof_columns)
                 if src_col != dest_col
             ]
             legal_moves = [
