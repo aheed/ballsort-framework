@@ -105,10 +105,32 @@ class Ch13Scenario(Scenario):
             ]
             return legal_moves
         
-        def __get_zobrist_index(x: int, y:int, color: int) -> int:
-            raise NotImplementedError("temp")
+        def __get_zobrist_index_old(x: int, y:int, color: int) -> int:
+            return color * (self.max_x+1) * (self.max_y+1) + y * (self.max_x+1) + x
+        
+        def __get_zobrist_index(ball_index: int, color: int) -> int:
+            return ball_index * (self.nof_colors) + color
+        
+        zobrist_dict: dict[int, int] = {}
+        for x in range(self.max_x+1):
+            for y in range(self.max_y+1):
+                for color in range(self.nof_colors):
+                    zobrist_dict[__get_zobrist_index(ball_index=__get_ball_index(x=x, y=y), color=color)] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
+        #for x in range(self.max_x+1):
+        #    for y in range(self.max_y+1):
+        #        for color in range(self.nof_colors):
+        #            zobrist_dict[__get_zobrist_index(x=x, y=y, color=color)] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
+
+        def __calc_hash(balls: list[int]) -> int:
+            hash = 0
+            for x in range(self.max_x+1):
+                for y in range(self.max_y+1):
+                    ball_index = __get_ball_index(x=x, y=y)
+                    hash = hash ^ zobrist_dict[__get_zobrist_index(ball_index=ball_index, color=balls[ball_index])]
+            return hash
 
         def __is_winnable(balls: list[int], previous_positions: set[int], position_hash: int) -> bool:
+                        
             if __is_in_goal_state(balls=balls):
                 return True
 
@@ -124,22 +146,23 @@ class Ch13Scenario(Scenario):
                 post_move_state[src_index] = self.nof_colors
 
                 #new_position_hash = __calc_hash_incrementally(start_hash=position_hash, move=move)
-                new_position_hash = __calc_hash(balls=balls)
+                new_position_hash = __calc_hash(balls=post_move_state)
 
-                all_positions = previous_positions.union({new_position_hash})
+                if position_hash not in previous_positions:
+                    all_positions = previous_positions.union({new_position_hash})
 
-                if __is_winnable(
-                    balls=post_move_state,
-                    previous_positions=all_positions,
-                    position_hash=new_position_hash
-                ):
-                    return True
+                    if __is_winnable(
+                        balls=post_move_state,
+                        previous_positions=all_positions,
+                        position_hash=new_position_hash
+                    ):
+                        return True
 
             return False
 
         def __is_starting_position_winnable(balls: list[int]) -> bool:
             hash = __calc_hash(balls=balls)
-            return __is_winnable(balls=balls, previous_positions=set(), position_hash=)
+            return __is_winnable(balls=balls, previous_positions=set(), position_hash=hash)
 
         ball_colors = __create_random_ball_list(nof_empty_columns=2)
         while not __is_starting_position_winnable(balls=ball_colors):
