@@ -5,17 +5,15 @@ import pathlib
 abspath = pathlib.Path(__file__).parent.joinpath("../src/ballsort").resolve()
 sys.path.append(f"{abspath}")
 
-from test_utils import get_column_top_occupied_pos, get_column_top_vacant_pos, go_to_pos, move_ball_by_column
+from test_utils import move_ball_by_column
 from control_factory import get_control_sim
 from ch13_scenario import Ch13Scenario
-from state_update_model import StatePosition
-from ball_control import BallControl
 
 repeat_positions = 0
 
 async def example_solution():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch13Scenario(seed=6581))
+    await bc.set_scenario(Ch13Scenario(seed=6550))
 
     max_x = bc.get_state().max_x
     max_y = bc.get_state().max_y
