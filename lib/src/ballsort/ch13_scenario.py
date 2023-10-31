@@ -191,11 +191,11 @@ class Ch13Scenario(Scenario):
             return balls
 
         def __is_winnable(
-            balls: list[int], previous_positions: set[int], position_hash: int
-        ) -> bool:
+            balls: list[int], previous_positions: set[int], previous_moves: list[tuple[int, int]], position_hash: int
+        ) -> tuple[bool, list[tuple[int, int]]]:
             if __is_in_goal_state(balls=balls):
                 print(balls)
-                return True
+                return (True, previous_moves)
 
             # try candidates
             for move in __get_legal_moves(balls=balls):
@@ -209,34 +209,43 @@ class Ch13Scenario(Scenario):
                 if new_position_hash not in previous_positions:
                     all_positions = previous_positions.union({new_position_hash})
 
-                    if __is_winnable(
+                    (winnable, winning_sequence) = __is_winnable(
                         balls=post_move_state,
                         previous_positions=all_positions,
+                        previous_moves=previous_moves + [move],
                         position_hash=new_position_hash,
-                    ):
-                        return True
+                    )
+                    
+                    if winnable:
+                        return (True, winning_sequence)
                 else:
                     #print("Position has been evaluated before. Skip.")
                     self.repeat_positions = self.repeat_positions + 1
 
-            return False
+            return (False, [])
 
-        def __is_starting_position_winnable(balls: list[int]) -> bool:
+        def __is_starting_position_winnable(balls: list[int]) -> tuple[bool, list[tuple[int, int]]]:
             hash = __calc_hash(balls=balls)
             return __is_winnable(
-                balls=balls, previous_positions=set(), position_hash=hash
+                balls=balls, previous_positions=set(), previous_moves=[], position_hash=hash
             )
 
         coordinates = __create_random_ball_list()
         #coordinates = __create_winnable_random_ball_list()
         print(coordinates, len(coordinates))
-        while not __is_starting_position_winnable(balls=coordinates):
-            print("unwinnable starting position. Trying again.")
+        winning_found = False
+        winning_sequence: list[tuple[int, int]] = []
+    
+        while not winning_found:
             self.start_positions = self.start_positions + 1
+            (winning_found, winning_sequence) = __is_starting_position_winnable(balls=coordinates)
+            if winning_found:
+                break
+            print("unwinnable starting position. Trying again.")
             coordinates = __create_random_ball_list()
             #raise ValueError("should not happen!")
 
-        print(f"winnable position found.\nTotal repeat positions: {self.repeat_positions}\nStarting positions evaluated: {self.start_positions}")
+        print(f"winnable position found.\nTotal repeat positions: {self.repeat_positions}\nStarting positions evaluated: {self.start_positions}\nwinning sequence in {len(winning_sequence)} moves:{winning_sequence}")
 
         def __get_state_position_by_ball_index(ball_index: int) -> StatePosition:
             x = ball_index // nof_rows
