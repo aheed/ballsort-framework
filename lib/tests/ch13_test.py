@@ -17,8 +17,10 @@ async def example_solution():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch13Scenario(seed=6587)) #6589
 
-    nof_rows = bc.get_state().max_y + 1
-    nof_columns = bc.get_state().max_x + 1        
+    max_x = bc.get_state().max_x
+    max_y = bc.get_state().max_y
+    nof_rows = max_y + 1
+    nof_columns = max_x + 1        
     nof_colors = nof_columns - 2 # assume two empty columns
 
     colors = list(set([ball.color for ball in bc.get_state().balls]))
@@ -26,9 +28,9 @@ async def example_solution():
 
     def __get_ball_index(x: int, y: int) -> int:
         assert(x >= 0)
-        assert(x <= bc.get_state().max_x)
+        assert(x <= max_x)
         assert(y >= 0)
-        assert(y <= bc.get_state().max_y)
+        assert(y <= max_y)
         return x * nof_rows + y
     
     def __get_ball_list() -> list[int]:
@@ -67,11 +69,11 @@ async def example_solution():
     def __is_move_legal(balls: list[int], move: tuple[int, int]) -> bool:
         src_x, dest_x = move
         src_y = __get_top_index(balls=balls, x=src_x)
-        if src_y > bc.get_state().max_y:
+        if src_y > max_y:
             return False  # source column is empty. Not legal.
 
         dest_col_top_y = __get_top_index(balls=balls, x=dest_x)
-        if dest_col_top_y > bc.get_state().max_y:
+        if dest_col_top_y > max_y:
             return True  # destination column is empty. Legal.
 
         if dest_col_top_y == 0:

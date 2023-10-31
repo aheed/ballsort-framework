@@ -231,21 +231,6 @@ class Ch13Scenario(Scenario):
             )
 
         coordinates = __create_random_ball_list()
-        #coordinates = __create_winnable_random_ball_list()
-        print(coordinates, len(coordinates))
-        winning_found = False
-        winning_sequence: list[tuple[int, int]] = []
-    
-        while not winning_found:
-            self.start_positions = self.start_positions + 1
-            (winning_found, winning_sequence) = __is_starting_position_winnable(balls=coordinates)
-            if winning_found:
-                break
-            print("unwinnable starting position. Trying again.")
-            coordinates = __create_random_ball_list()
-            #raise ValueError("should not happen!")
-
-        print(f"winnable position found.\nTotal repeat positions: {self.repeat_positions}\nStarting positions evaluated: {self.start_positions}\nwinning sequence in {len(winning_sequence)} moves:{winning_sequence}")
 
         def __get_state_position_by_ball_index(ball_index: int) -> StatePosition:
             x = ball_index // nof_rows
