@@ -15,7 +15,7 @@ repeat_positions = 0
 
 async def example_solution():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch13Scenario(seed=6587)) #6589
+    await bc.set_scenario(Ch13Scenario(seed=6581))
 
     max_x = bc.get_state().max_x
     max_y = bc.get_state().max_y
@@ -34,11 +34,6 @@ async def example_solution():
         return x * nof_rows + y
     
     def __get_ball_list() -> list[int]:
-        #balls: list[int] = []
-        #for x in range(nof_columns):
-        #    for y in range(nof_rows):
-        #        balls[__get_ball_index(x=x, y=y)] = empty_color
-
         balls = [empty_color for _ in range(nof_columns) for _ in range(nof_rows)]
 
         for ball in bc.get_state().balls:
@@ -47,11 +42,14 @@ async def example_solution():
 
     def __get_color(balls: list[int], x: int, y: int) -> int:
         return balls[__get_ball_index(x=x, y=y)]
+    
+    def __get_column(balls: list[int], x: int) -> list[int]:
+        return balls[x * (nof_rows) : (x + 1) * (nof_rows)]
 
     def __get_columns(balls: list[int]) -> list[list[int]]:
         return [
-            balls[n * (nof_rows) : (n + 1) * (nof_rows)]
-            for n in range(nof_colors)
+            __get_column(balls=balls, x=x)
+            for x in range(nof_columns)
         ]
 
     def __is_in_goal_state(balls: list[int]) -> bool:
@@ -65,8 +63,12 @@ async def example_solution():
                 ret = y
                 break
         return ret
+    
+    def __column_is_single_color(balls: list[int], x: int) -> bool:
+        column = __get_column(balls=balls, x=x)
+        return len(set(column)) == 1
 
-    def __is_move_legal(balls: list[int], move: tuple[int, int]) -> bool:
+    def __is_move_meaningful(balls: list[int], move: tuple[int, int]) -> bool:
         src_x, dest_x = move
         src_y = __get_top_index(balls=balls, x=src_x)
         if src_y > max_y:
@@ -74,7 +76,10 @@ async def example_solution():
 
         dest_col_top_y = __get_top_index(balls=balls, x=dest_x)
         if dest_col_top_y > max_y:
-            return True  # destination column is empty. Legal.
+            # destination column is empty
+            if src_y == 0 and __column_is_single_color(balls=balls, x=src_x):
+                return False # source column is finished. Legal but useless.
+            return True
 
         if dest_col_top_y == 0:
             return False  # destination column is full. Not Legal.
@@ -83,17 +88,16 @@ async def example_solution():
             balls=balls, x=dest_x, y=dest_col_top_y
         )
 
-    def __get_legal_moves(balls: list[int]) -> list[tuple[int, int]]:
+    def __get_meaningful_moves(balls: list[int]) -> list[tuple[int, int]]:
         all_moves = [
             (src_col, dest_col)
             for src_col in range(nof_columns)
             for dest_col in range(nof_columns)
             if src_col != dest_col
         ]
-        legal_moves = [
-            move for move in all_moves if __is_move_legal(balls=balls, move=move)
+        return [
+            move for move in all_moves if __is_move_meaningful(balls=balls, move=move)
         ]
-        return legal_moves
 
     def __get_zobrist_index(ball_index: int, color: int) -> int:
         return ball_index * (nof_colors) + color
@@ -143,7 +147,7 @@ async def example_solution():
             return (True, previous_moves)
 
         # try candidates
-        for move in __get_legal_moves(balls=balls):
+        for move in __get_meaningful_moves(balls=balls):
             src_x, dest_x = move
 
             post_move_state = __make_move(balls=balls, src_x=src_x, dest_x=dest_x)
@@ -164,7 +168,6 @@ async def example_solution():
                 if winnable:
                     return (True, winning_sequence)
             else:
-                #print("Position has been evaluated before. Skip.")
                 repeat_positions = repeat_positions + 1
 
         return (False, [])
