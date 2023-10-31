@@ -9,11 +9,9 @@ from test_utils import move_ball_by_column
 from control_factory import get_control_sim
 from ch13_scenario import Ch13Scenario
 
-repeat_positions = 0
-
 async def example_solution():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch13Scenario(seed=6550))
+    await bc.set_scenario(Ch13Scenario(seed=5050))
 
     max_x = bc.get_state().max_x
     max_y = bc.get_state().max_y
@@ -63,7 +61,7 @@ async def example_solution():
         return ret
     
     def __column_is_single_color(balls: list[int], x: int) -> bool:
-        column = __get_column(balls=balls, x=x)
+        column = [c for c in __get_column(balls=balls, x=x) if c != empty_color]
         return len(set(column)) == 1
 
     def __is_move_meaningful(balls: list[int], move: tuple[int, int]) -> bool:
@@ -75,8 +73,8 @@ async def example_solution():
         dest_col_top_y = __get_top_index(balls=balls, x=dest_x)
         if dest_col_top_y > max_y:
             # destination column is empty
-            if src_y == 0 and __column_is_single_color(balls=balls, x=src_x):
-                return False # source column is finished. Legal but useless.
+            if __column_is_single_color(balls=balls, x=src_x):
+                return False # source column is single color. Legal but useless.
             return True
 
         if dest_col_top_y == 0:
@@ -135,14 +133,12 @@ async def example_solution():
         post_move_state[src_index] = nof_colors
         return post_move_state
 
-    def __is_winnable(
+    def __find_winning_sequence_recursive(
         balls: list[int], previous_positions: set[int], previous_moves: list[tuple[int, int]], position_hash: int
-    ) -> tuple[bool, list[tuple[int, int]]]:
+    ) -> list[tuple[int, int]]:
         
-        global repeat_positions
-
         if __is_in_goal_state(balls=balls):
-            return (True, previous_moves)
+            return previous_moves
 
         # try candidates
         for move in __get_meaningful_moves(balls=balls):
@@ -156,33 +152,31 @@ async def example_solution():
             if new_position_hash not in previous_positions:
                 all_positions = previous_positions.union({new_position_hash})
 
-                (winnable, winning_sequence) = __is_winnable(
+                winning_sequence = __find_winning_sequence_recursive(
                     balls=post_move_state,
                     previous_positions=all_positions,
                     previous_moves=previous_moves + [move],
                     position_hash=new_position_hash,
                 )
                 
-                if winnable:
-                    return (True, winning_sequence)
-            else:
-                repeat_positions = repeat_positions + 1
+                if len(winning_sequence):
+                    return winning_sequence
 
-        return (False, [])
+        return []
 
-    def __is_starting_position_winnable(balls: list[int]) -> tuple[bool, list[tuple[int, int]]]:
+    def __find_winning_sequence(balls: list[int]) -> list[tuple[int, int]]:
         hash = __calc_hash(balls=balls)
-        return __is_winnable(
+        return __find_winning_sequence_recursive(
             balls=balls, previous_positions=set(), previous_moves=[], position_hash=hash
         )
 
     color_grid = __get_ball_list()
-    (winning_found, winning_sequence) = __is_starting_position_winnable(balls=color_grid)
+    winning_sequence = __find_winning_sequence(balls=color_grid)
 
-    if not winning_found:
+    if len(winning_sequence) == 0:
         raise ValueError("Unwinnable starting position. should not happen!")
 
-    print(f"winnable position found.\nTotal repeat positions: {repeat_positions}\nwinning sequence in {len(winning_sequence)} moves:{winning_sequence}")
+    print(f"Winning sequence in {len(winning_sequence)} moves:{winning_sequence}")
 
     for move in winning_sequence:
         src_x, dest_x = move
