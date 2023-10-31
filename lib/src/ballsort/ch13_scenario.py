@@ -227,14 +227,14 @@ class Ch13Scenario(Scenario):
                 balls=balls, previous_positions=set(), position_hash=hash
             )
 
-        #coordinates = __create_random_ball_list()
-        coordinates = __create_winnable_random_ball_list()
+        coordinates = __create_random_ball_list()
+        #coordinates = __create_winnable_random_ball_list()
         print(coordinates, len(coordinates))
         while not __is_starting_position_winnable(balls=coordinates):
-            #print("unwinnable starting position. Trying again.")
+            print("unwinnable starting position. Trying again.")
             self.start_positions = self.start_positions + 1
-            #coordinates = __create_random_ball_list()
-            raise ValueError("should not happen!")
+            coordinates = __create_random_ball_list()
+            #raise ValueError("should not happen!")
 
         print(f"winnable position found.\nTotal repeat positions: {self.repeat_positions}\nStarting positions evaluated: {self.start_positions}")
 
