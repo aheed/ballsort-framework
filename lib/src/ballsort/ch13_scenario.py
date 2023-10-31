@@ -261,7 +261,7 @@ class Ch13Scenario(Scenario):
             columns[ball.pos.x].append(ball)
 
         # No more than one color per column
-        return next((False for column in columns if len(set([ball.color for ball in column])) > 1), True)
+        return next((False for column in columns if (len(column) != (self.max_y+1) and len(column) != 0) or len(set([ball.color for ball in column])) > 1), True)
 
     def on_ball_dropped(
         self, state: StateModel, ball: StateBall

@@ -140,7 +140,6 @@ async def example_solution():
         global repeat_positions
 
         if __is_in_goal_state(balls=balls):
-            print(balls)
             return (True, previous_moves)
 
         # try candidates
@@ -177,8 +176,6 @@ async def example_solution():
         )
 
     color_grid = __get_ball_list()
-    print(color_grid, len(color_grid))
-
     (winning_found, winning_sequence) = __is_starting_position_winnable(balls=color_grid)
 
     if not winning_found:
@@ -186,8 +183,11 @@ async def example_solution():
 
     print(f"winnable position found.\nTotal repeat positions: {repeat_positions}\nwinning sequence in {len(winning_sequence)} moves:{winning_sequence}")
 
+    for move in winning_sequence:
+        src_x, dest_x = move
+        await move_ball_by_column(bc=bc, src_x=src_x, dest_x=dest_x)
            
-    #assert bc.get_state().goal_accomplished
+    assert bc.get_state().goal_accomplished
 
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
 
