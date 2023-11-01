@@ -2,9 +2,11 @@ import asyncio
 import random
 import sys
 import pathlib
+
 abspath = pathlib.Path(__file__).parent.joinpath("../src/ballsort").resolve()
 sys.path.append(f"{abspath}")
 
+from color_sorter import ColorSorter
 from test_utils import move_ball_by_column
 from control_factory import get_control_sim
 from ch13_scenario import Ch13Scenario
@@ -15,167 +17,26 @@ async def example_solution():
 
     max_x = bc.get_state().max_x
     max_y = bc.get_state().max_y
-    nof_rows = max_y + 1
-    nof_columns = max_x + 1        
-    nof_colors = nof_columns - 2 # assume two empty columns
+    color_sorter = ColorSorter(max_x=max_x, max_y=max_y)
 
     colors = list(set([ball.color for ball in bc.get_state().balls]))
     empty_color = len(colors)
 
-    def __get_ball_index(x: int, y: int) -> int:
-        assert(x >= 0)
-        assert(x <= max_x)
-        assert(y >= 0)
-        assert(y <= max_y)
-        return x * nof_rows + y
-    
+        
     def __get_ball_list() -> list[int]:
-        balls = [empty_color for _ in range(nof_columns) for _ in range(nof_rows)]
+        balls = [empty_color for _ in range(color_sorter.nof_columns) for _ in range(color_sorter.nof_rows)]
 
         for ball in bc.get_state().balls:
-            balls[__get_ball_index(x=ball.pos.x, y=ball.pos.y)] = colors.index(ball.color)
+            balls[color_sorter.get_ball_index(x=ball.pos.x, y=ball.pos.y)] = colors.index(ball.color)
         return balls
 
-    def __get_color(balls: list[int], x: int, y: int) -> int:
-        return balls[__get_ball_index(x=x, y=y)]
-    
-    def __get_column(balls: list[int], x: int) -> list[int]:
-        return balls[x * (nof_rows) : (x + 1) * (nof_rows)]
-
-    def __get_columns(balls: list[int]) -> list[list[int]]:
-        return [
-            __get_column(balls=balls, x=x)
-            for x in range(nof_columns)
-        ]
-
-    def __is_in_goal_state(balls: list[int]) -> bool:
-        columns = __get_columns(balls=balls)
-        return next((False for column in columns if len(set(column)) != 1), True)
-
-    def __get_top_index(balls: list[int], x: int) -> int:
-        ret = nof_rows
-        for y in range(nof_rows):
-            if __get_color(balls=balls, x=x, y=y) != nof_colors:
-                ret = y
-                break
-        return ret
-    
-    def __column_is_single_color(balls: list[int], x: int) -> bool:
-        column = [c for c in __get_column(balls=balls, x=x) if c != empty_color]
-        return len(set(column)) == 1
-
-    def __is_move_meaningful(balls: list[int], move: tuple[int, int]) -> bool:
-        src_x, dest_x = move
-        src_y = __get_top_index(balls=balls, x=src_x)
-        if src_y > max_y:
-            return False  # source column is empty. Not legal.
-
-        dest_col_top_y = __get_top_index(balls=balls, x=dest_x)
-        if dest_col_top_y > max_y:
-            # destination column is empty
-            if __column_is_single_color(balls=balls, x=src_x):
-                return False # source column is single color. Legal but useless.
-            return True
-
-        if dest_col_top_y == 0:
-            return False  # destination column is full. Not Legal.
-
-        return __get_color(balls=balls, x=src_x, y=src_y) == __get_color(
-            balls=balls, x=dest_x, y=dest_col_top_y
-        )
-
-    def __get_meaningful_moves(balls: list[int]) -> list[tuple[int, int]]:
-        all_moves = [
-            (src_col, dest_col)
-            for src_col in range(nof_columns)
-            for dest_col in range(nof_columns)
-            if src_col != dest_col
-        ]
-        return [
-            move for move in all_moves if __is_move_meaningful(balls=balls, move=move)
-        ]
-
-    def __get_zobrist_index(ball_index: int, color: int) -> int:
-        return ball_index * (nof_colors) + color
-
-    zobrist_dict: dict[int, int] = {}
-    for x in range(nof_columns):
-        for y in range(nof_rows):
-            for color in range(nof_colors + 1): # +1 for the no color (no ball) case
-                zobrist_dict[
-                    __get_zobrist_index(
-                        ball_index=__get_ball_index(x=x, y=y), color=color
-                    )
-                ] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
-
-    def __calc_hash(balls: list[int]) -> int:
-        hash = 0
-        for x in range(nof_columns):
-            for y in range(nof_rows):
-                ball_index = __get_ball_index(x=x, y=y)
-                hash = (
-                    hash
-                    ^ zobrist_dict[
-                        __get_zobrist_index(
-                            ball_index=ball_index, color=balls[ball_index]
-                        )
-                    ]
-                )
-        return hash
-    
-    def __make_move(balls: list[int], src_x: int, dest_x: int) -> list[int]:
-        src_y = __get_top_index(balls=balls, x=src_x)
-        dest_y = __get_top_index(balls=balls, x=dest_x) - 1
-        src_index = __get_ball_index(x=src_x, y=src_y)
-        dest_index = __get_ball_index(x=dest_x, y=dest_y)
-        post_move_state = balls.copy()
-        post_move_state[dest_index] = balls[src_index]
-        post_move_state[src_index] = nof_colors
-        return post_move_state
-
-    def __find_winning_sequence_recursive(
-        balls: list[int], previous_positions: set[int], previous_moves: list[tuple[int, int]], position_hash: int
-    ) -> list[tuple[int, int]]:
-        
-        if __is_in_goal_state(balls=balls):
-            return previous_moves
-
-        # try candidates
-        for move in __get_meaningful_moves(balls=balls):
-            src_x, dest_x = move
-
-            post_move_state = __make_move(balls=balls, src_x=src_x, dest_x=dest_x)
-
-            # new_position_hash = __calc_hash_incrementally(start_hash=position_hash, move=move)
-            new_position_hash = __calc_hash(balls=post_move_state)
-
-            if new_position_hash not in previous_positions:
-                all_positions = previous_positions.union({new_position_hash})
-
-                winning_sequence = __find_winning_sequence_recursive(
-                    balls=post_move_state,
-                    previous_positions=all_positions,
-                    previous_moves=previous_moves + [move],
-                    position_hash=new_position_hash,
-                )
-                
-                if len(winning_sequence):
-                    return winning_sequence
-
-        return []
-
-    def __find_winning_sequence(balls: list[int]) -> list[tuple[int, int]]:
-        hash = __calc_hash(balls=balls)
-        return __find_winning_sequence_recursive(
-            balls=balls, previous_positions=set(), previous_moves=[], position_hash=hash
-        )
-
     color_grid = __get_ball_list()
-    winning_sequence = __find_winning_sequence(balls=color_grid)
+    winning_sequence = color_sorter.find_winning_sequence(balls=color_grid)
 
     if len(winning_sequence) == 0:
         raise ValueError("Unwinnable starting position. should not happen!")
 
+    print(f"In total {color_sorter.repeat_positions} repeated positions")
     print(f"Winning sequence in {len(winning_sequence)} moves:{winning_sequence}")
 
     for move in winning_sequence:
