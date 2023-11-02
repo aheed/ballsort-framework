@@ -11,6 +11,7 @@ sys.path.append(f"{abspath}")
 class ColorSortResult:
     successful: bool
     moves: list[tuple[int, int]]
+    max_moves: int # only relevant for unsuccessful searches
 
 @dataclass
 class ColorSorter:
@@ -148,48 +149,50 @@ class ColorSorter:
         #    return ret
 
         if position_hash in self.result_cache:
-            #print("cache hit")
-            self.cache_hits = self.cache_hits + 1
-            return self.result_cache[position_hash]
+            cached_result = self.result_cache[position_hash]
+            if cached_result.successful or cached_result.max_moves >= max_moves:
+                #print("cache hit")
+                self.cache_hits = self.cache_hits + 1
+                return cached_result
         
         if self.__is_in_goal_state(balls=balls):
-            ret = ColorSortResult(successful=True, moves=[])
+            ret = ColorSortResult(successful=True, moves=[], max_moves=max_moves)
             self.result_cache[position_hash] = ret
             return ret
 
-        best_move_result = ColorSortResult(successful=False, moves=[])
+        best_move_result = ColorSortResult(successful=False, moves=[], max_moves=max_moves)
         max_submoves = max_moves-1
         fewest_moves = 10000
-        #if max_submoves >0:
-        for move in self.__get_meaningful_moves(balls=balls):
-            src_x, dest_x = move
+        if max_submoves > 0:
+            for move in self.__get_meaningful_moves(balls=balls):
+                src_x, dest_x = move
 
-            post_move_state = self.__make_move(balls=balls, src_x=src_x, dest_x=dest_x)
-            self.total_positions = self.total_positions + 1
+                post_move_state = self.__make_move(balls=balls, src_x=src_x, dest_x=dest_x)
+                self.total_positions = self.total_positions + 1
 
-            # new_position_hash = __calc_hash_incrementally(start_hash=position_hash, move=move)
-            new_position_hash = self.__calc_hash(balls=post_move_state)
+                # new_position_hash = __calc_hash_incrementally(start_hash=position_hash, move=move)
+                new_position_hash = self.__calc_hash(balls=post_move_state)
 
-            if new_position_hash not in previous_positions:
-                all_positions = previous_positions.union({new_position_hash})
+                if new_position_hash not in previous_positions:
+                    all_positions = previous_positions.union({new_position_hash})
 
-                move_result = self.__find_winning_sequence_recursive(
-                    balls=post_move_state,
-                    previous_positions=all_positions,
-                    position_hash=new_position_hash,
-                    max_moves=max_submoves
-                )
-                
-                nof_submoves = len(move_result.moves)
-                if move_result.successful and nof_submoves < fewest_moves:
-                    fewest_moves = nof_submoves
-                    best_move_result = ColorSortResult(successful=True, moves=[move]+move_result.moves)
-                    max_submoves = nof_submoves
-                    print(f"new best: {max_submoves}\n{best_move_result.moves}")
-                    #return ColorSortResult(successful=True, moves=[move] + move_result.moves)
-                    #return best_move_result
-            else:
-                self.repeat_positions = self.repeat_positions + 1
+                    move_result = self.__find_winning_sequence_recursive(
+                        balls=post_move_state,
+                        previous_positions=all_positions,
+                        position_hash=new_position_hash,
+                        max_moves=max_submoves
+                    )
+                    
+                    nof_submoves = len(move_result.moves)
+                    if move_result.successful and nof_submoves < fewest_moves:
+                        fewest_moves = nof_submoves
+                        best_move_result = ColorSortResult(successful=True, moves=[move]+move_result.moves, max_moves=max_moves)
+                        max_submoves = nof_submoves
+                        #print(f"new best: {max_submoves}\n{best_move_result.moves}")
+                        #return ColorSortResult(successful=True, moves=[move] + move_result.moves)
+                        #return best_move_result
+                else:
+                    self.repeat_positions = self.repeat_positions + 1
 
         self.result_cache[position_hash] = best_move_result
         return best_move_result
