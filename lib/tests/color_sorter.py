@@ -24,7 +24,9 @@ class ColorSorter:
     empty_color: int = 0 # overwritten in __post_init__ 
     total_positions: int = 0
     repeat_positions: int = 0
+    cache_hits: int = 0
     zobrist_dict: dict[int, int] = field(default_factory=dict) # populated in __post_init__ 
+    result_cache: dict[int, ColorSortResult] = field(default_factory=dict)
 
     def __post_init__(self):
         self.nof_rows = self.max_y + 1
@@ -139,15 +141,26 @@ class ColorSorter:
     ) -> ColorSortResult:
         
         #print(f"max moves: {max_moves}")
-        if max_moves == 0:
-            #print("max depth reached")
-            return ColorSortResult(successful=False, moves=[])
+        #if max_moves == 0:
+        #    #print("max depth reached")
+        #    ret = ColorSortResult(successful=False, moves=[])
+        #    self.result_cache[position_hash] = ret
+        #    return ret
+
+        if position_hash in self.result_cache:
+            #print("cache hit")
+            self.cache_hits = self.cache_hits + 1
+            return self.result_cache[position_hash]
         
         if self.__is_in_goal_state(balls=balls):
-            return ColorSortResult(successful=True, moves=[])
+            ret = ColorSortResult(successful=True, moves=[])
+            self.result_cache[position_hash] = ret
+            return ret
 
         best_move_result = ColorSortResult(successful=False, moves=[])
         max_submoves = max_moves-1
+        fewest_moves = 10000
+        #if max_submoves >0:
         for move in self.__get_meaningful_moves(balls=balls):
             src_x, dest_x = move
 
@@ -167,15 +180,18 @@ class ColorSorter:
                     max_moves=max_submoves
                 )
                 
-                if move_result.successful:
+                nof_submoves = len(move_result.moves)
+                if move_result.successful and nof_submoves < fewest_moves:
+                    fewest_moves = nof_submoves
                     best_move_result = ColorSortResult(successful=True, moves=[move]+move_result.moves)
-                    max_submoves = len(move_result.moves)
-                    #print(f"new best: {max_submoves}\n{best_move_result.moves}")
+                    max_submoves = nof_submoves
+                    print(f"new best: {max_submoves}\n{best_move_result.moves}")
                     #return ColorSortResult(successful=True, moves=[move] + move_result.moves)
-                    return best_move_result
+                    #return best_move_result
             else:
                 self.repeat_positions = self.repeat_positions + 1
 
+        self.result_cache[position_hash] = best_move_result
         return best_move_result
 
     def find_winning_sequence(self, balls: list[int]) -> ColorSortResult:

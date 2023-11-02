@@ -36,7 +36,7 @@ async def example_solution():
     if not winning_sequence.successful:
         raise ValueError("Unwinnable starting position. should not happen!")
 
-    print(f"Positions evaluated:{color_sorter.total_positions}  repeated positions:{color_sorter.repeat_positions}")
+    print(f"Positions evaluated:{color_sorter.total_positions}\nrepeated positions:{color_sorter.repeat_positions}\ncache hits:{color_sorter.cache_hits}")
     print(f"Winning sequence in {len(winning_sequence.moves)}  moves:{winning_sequence.moves}")
 
     for move in winning_sequence.moves:
