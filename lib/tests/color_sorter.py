@@ -134,11 +134,11 @@ class ColorSorter:
         return post_move_state
 
     def __find_winning_sequence_recursive(self, 
-        balls: list[int], previous_positions: set[int], previous_moves: list[tuple[int, int]], position_hash: int
+        balls: list[int], previous_positions: set[int], position_hash: int
     ) -> ColorSortResult:
         
         if self.__is_in_goal_state(balls=balls):
-            return ColorSortResult(successful=True, moves=previous_moves)
+            return ColorSortResult(successful=True, moves=[])
 
         # try candidates
         for move in self.__get_meaningful_moves(balls=balls):
@@ -152,15 +152,14 @@ class ColorSorter:
             if new_position_hash not in previous_positions:
                 all_positions = previous_positions.union({new_position_hash})
 
-                winning_result = self.__find_winning_sequence_recursive(
+                move_result = self.__find_winning_sequence_recursive(
                     balls=post_move_state,
                     previous_positions=all_positions,
-                    previous_moves=previous_moves + [move],
                     position_hash=new_position_hash,
                 )
                 
-                if winning_result.successful:
-                    return winning_result
+                if move_result.successful:
+                    return ColorSortResult(successful=True, moves=[move] + move_result.moves)
             else:
                 self.repeat_positions = self.repeat_positions + 1
 
@@ -169,6 +168,6 @@ class ColorSorter:
     def find_winning_sequence(self, balls: list[int]) -> ColorSortResult:
         hash = self.__calc_hash(balls=balls)
         return self.__find_winning_sequence_recursive(
-            balls=balls, previous_positions=set(), previous_moves=[], position_hash=hash
+            balls=balls, previous_positions=set(), position_hash=hash
         )
     
