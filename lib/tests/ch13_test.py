@@ -13,7 +13,7 @@ from ch13_scenario import Ch13Scenario
 
 async def example_solution():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch13Scenario(seed=5050))
+    await bc.set_scenario(Ch13Scenario(seed=4050)) #5050
 
     max_x = bc.get_state().max_x
     max_y = bc.get_state().max_y
@@ -36,8 +36,8 @@ async def example_solution():
     if not winning_sequence.successful:
         raise ValueError("Unwinnable starting position. should not happen!")
 
-    print(f"In total {color_sorter.repeat_positions} repeated positions")
-    print(f"Winning sequence in {len(winning_sequence.moves)} moves:{winning_sequence.moves}")
+    print(f"Positions evaluated:{color_sorter.total_positions}  repeated positions:{color_sorter.repeat_positions}")
+    print(f"Winning sequence in {len(winning_sequence.moves)}  moves:{winning_sequence.moves}")
 
     for move in winning_sequence.moves:
         src_x, dest_x = move

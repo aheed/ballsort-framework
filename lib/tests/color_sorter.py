@@ -22,6 +22,7 @@ class ColorSorter:
     nof_columns: int = 0 # overwritten in __post_init__
     nof_colors: int = 0 # overwritten in __post_init__ 
     empty_color: int = 0 # overwritten in __post_init__ 
+    total_positions: int = 0
     repeat_positions: int = 0
     zobrist_dict: dict[int, int] = field(default_factory=dict) # populated in __post_init__ 
 
@@ -134,17 +135,24 @@ class ColorSorter:
         return post_move_state
 
     def __find_winning_sequence_recursive(self, 
-        balls: list[int], previous_positions: set[int], position_hash: int
+        balls: list[int], previous_positions: set[int], position_hash: int, max_moves: int
     ) -> ColorSortResult:
+        
+        #print(f"max moves: {max_moves}")
+        if max_moves == 0:
+            #print("max depth reached")
+            return ColorSortResult(successful=False, moves=[])
         
         if self.__is_in_goal_state(balls=balls):
             return ColorSortResult(successful=True, moves=[])
 
-        # try candidates
+        best_move_result = ColorSortResult(successful=False, moves=[])
+        max_submoves = max_moves-1
         for move in self.__get_meaningful_moves(balls=balls):
             src_x, dest_x = move
 
             post_move_state = self.__make_move(balls=balls, src_x=src_x, dest_x=dest_x)
+            self.total_positions = self.total_positions + 1
 
             # new_position_hash = __calc_hash_incrementally(start_hash=position_hash, move=move)
             new_position_hash = self.__calc_hash(balls=post_move_state)
@@ -156,18 +164,23 @@ class ColorSorter:
                     balls=post_move_state,
                     previous_positions=all_positions,
                     position_hash=new_position_hash,
+                    max_moves=max_submoves
                 )
                 
                 if move_result.successful:
-                    return ColorSortResult(successful=True, moves=[move] + move_result.moves)
+                    best_move_result = ColorSortResult(successful=True, moves=[move]+move_result.moves)
+                    max_submoves = len(move_result.moves)
+                    #print(f"new best: {max_submoves}\n{best_move_result.moves}")
+                    #return ColorSortResult(successful=True, moves=[move] + move_result.moves)
+                    return best_move_result
             else:
                 self.repeat_positions = self.repeat_positions + 1
 
-        return ColorSortResult(successful=False, moves=[])
+        return best_move_result
 
     def find_winning_sequence(self, balls: list[int]) -> ColorSortResult:
         hash = self.__calc_hash(balls=balls)
         return self.__find_winning_sequence_recursive(
-            balls=balls, previous_positions=set(), position_hash=hash
+            balls=balls, previous_positions=set(), position_hash=hash, max_moves=200
         )
     
