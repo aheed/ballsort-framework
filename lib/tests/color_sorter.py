@@ -6,6 +6,12 @@ import pathlib
 abspath = pathlib.Path(__file__).parent.joinpath("../src/ballsort").resolve()
 sys.path.append(f"{abspath}")
 
+
+@dataclass
+class ColorSortResult:
+    successful: bool
+    moves: list[tuple[int, int]]
+
 @dataclass
 class ColorSorter:
     """Finds a sequence of moves to solve color sorting challenge"""
@@ -129,10 +135,10 @@ class ColorSorter:
 
     def __find_winning_sequence_recursive(self, 
         balls: list[int], previous_positions: set[int], previous_moves: list[tuple[int, int]], position_hash: int
-    ) -> list[tuple[int, int]]:
+    ) -> ColorSortResult:
         
         if self.__is_in_goal_state(balls=balls):
-            return previous_moves
+            return ColorSortResult(successful=True, moves=previous_moves)
 
         # try candidates
         for move in self.__get_meaningful_moves(balls=balls):
@@ -146,21 +152,21 @@ class ColorSorter:
             if new_position_hash not in previous_positions:
                 all_positions = previous_positions.union({new_position_hash})
 
-                winning_sequence = self.__find_winning_sequence_recursive(
+                winning_result = self.__find_winning_sequence_recursive(
                     balls=post_move_state,
                     previous_positions=all_positions,
                     previous_moves=previous_moves + [move],
                     position_hash=new_position_hash,
                 )
                 
-                if len(winning_sequence):
-                    return winning_sequence
+                if winning_result.successful:
+                    return winning_result
             else:
                 self.repeat_positions = self.repeat_positions + 1
 
-        return []
+        return ColorSortResult(successful=False, moves=[])
 
-    def find_winning_sequence(self, balls: list[int]) -> list[tuple[int, int]]:
+    def find_winning_sequence(self, balls: list[int]) -> ColorSortResult:
         hash = self.__calc_hash(balls=balls)
         return self.__find_winning_sequence_recursive(
             balls=balls, previous_positions=set(), previous_moves=[], position_hash=hash

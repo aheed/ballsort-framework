@@ -33,13 +33,13 @@ async def example_solution():
     color_grid = __get_ball_list()
     winning_sequence = color_sorter.find_winning_sequence(balls=color_grid)
 
-    if len(winning_sequence) == 0:
+    if not winning_sequence.successful:
         raise ValueError("Unwinnable starting position. should not happen!")
 
     print(f"In total {color_sorter.repeat_positions} repeated positions")
-    print(f"Winning sequence in {len(winning_sequence)} moves:{winning_sequence}")
+    print(f"Winning sequence in {len(winning_sequence.moves)} moves:{winning_sequence.moves}")
 
-    for move in winning_sequence:
+    for move in winning_sequence.moves:
         src_x, dest_x = move
         await move_ball_by_column(bc=bc, src_x=src_x, dest_x=dest_x)
            
