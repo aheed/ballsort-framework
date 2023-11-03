@@ -27,7 +27,23 @@ class ColorSorter:
     repeat_positions: int = 0
     cache_hits: int = 0
     zobrist_dict: dict[int, int] = field(default_factory=dict) # populated in __post_init__ 
+    column_zobrist_dict: dict[int, int] = field(default_factory=dict) # populated in __post_init__ 
     result_cache: dict[int, ColorSortResult] = field(default_factory=dict)
+
+    def __get_column_zobrist_index(self, column: list[int]) -> int:
+        ix = 0
+        for row in range(self.nof_rows):
+            ix = ix * (self.nof_colors+1) + column[row]
+            #ix = ix + pow(self.nof_colors+1, row) * column[row]
+        return ix
+    
+    #def __get_column_hash(x: int)
+    
+    def __calc_total_hash(self, balls: list[int]) -> int:
+        hash = 0
+        for column in self.__get_columns(balls=balls):
+            hash = hash ^ self.column_zobrist_dict[self.__get_column_zobrist_index(column=column)]
+        return hash
 
     def __post_init__(self):
         self.nof_rows = self.max_y + 1
@@ -42,6 +58,17 @@ class ColorSorter:
                             ball_index=self.get_ball_index(x=x, y=y), color=color
                         )
                     ] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
+
+        c = 0
+        for index in range(pow(self.nof_colors + 1, self.nof_rows)):
+            c = c +1
+            self.column_zobrist_dict[index] = random.randint(0, 0xFFFFFFFFFFFFFFFF)
+        
+        a = len(self.column_zobrist_dict)
+        b = self.__get_column_zobrist_index([self.empty_color, self.empty_color, self.empty_color, self.empty_color]) + 1
+        print(a, b, c)
+        assert a == b
+        assert 0 == self.__get_column_zobrist_index([0,0,0,0])
 
     def __get_zobrist_index(self, ball_index: int, color: int) -> int:
         return ball_index * (self.nof_colors) + color
@@ -113,6 +140,7 @@ class ColorSorter:
         ]
 
     def __calc_hash(self, balls: list[int]) -> int:
+        return self.__calc_total_hash(balls=balls)
         hash = 0
         for x in range(self.nof_columns):
             for y in range(self.nof_rows):
