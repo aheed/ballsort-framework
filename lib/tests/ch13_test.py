@@ -12,7 +12,7 @@ from ch13_scenario import Ch13Scenario
 
 async def example_solution():
     bc = get_control_sim(0)
-    await bc.set_scenario(Ch13Scenario(seed=4050)) #5050
+    await bc.set_scenario(Ch13Scenario(seed=4050))
 
     max_x = bc.get_state().max_x
     max_y = bc.get_state().max_y

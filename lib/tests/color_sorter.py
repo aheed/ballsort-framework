@@ -23,9 +23,11 @@ class ColorSorter:
     nof_columns: int = 0 # overwritten in __post_init__
     nof_colors: int = 0 # overwritten in __post_init__ 
     empty_color: int = 0 # overwritten in __post_init__ 
-    total_positions: int = 0
-    repeat_positions: int = 0
-    cache_hits: int = 0
+    goal_state_hash: int = 0 # overwritten in __post_init__ 
+    total_positions: int = 0 # debug
+    repeat_positions: int = 0 # debug
+    nof_empty_columns: int = 2 # overridable
+    cache_hits: int = 0 # debug
     zobrist_dict: dict[int, int] = field(default_factory=dict) # populated in __post_init__ 
     column_zobrist_dict: dict[int, int] = field(default_factory=dict) # populated in __post_init__ 
     result_cache: dict[int, ColorSortResult] = field(default_factory=dict)
@@ -48,7 +50,7 @@ class ColorSorter:
     def __post_init__(self):
         self.nof_rows = self.max_y + 1
         self.nof_columns = self.max_x + 1        
-        self.nof_colors = self.nof_columns - 2 # assume two empty columns
+        self.nof_colors = self.nof_columns - self.nof_empty_columns
         self.empty_color = self.nof_colors
         for x in range(self.nof_columns):
             for y in range(self.nof_rows):
@@ -69,6 +71,8 @@ class ColorSorter:
         print(a, b, c)
         assert a == b
         assert 0 == self.__get_column_zobrist_index([0,0,0,0])
+        goal_state = [c for c in range(self.nof_colors) for _ in range(self.nof_rows)] + [5 for _ in range(self.nof_empty_columns * self.nof_rows)]
+        self.goal_state_hash = self.__calc_hash(balls=goal_state)
 
     def __get_zobrist_index(self, ball_index: int, color: int) -> int:
         return ball_index * (self.nof_colors) + color
@@ -92,9 +96,10 @@ class ColorSorter:
             for x in range(self.nof_columns)
         ]
 
-    def __is_in_goal_state(self, balls: list[int]) -> bool:
-        columns = self.__get_columns(balls=balls)
-        return next((False for column in columns if len(set(column)) != 1), True)
+    #def __is_in_goal_state(self, balls: list[int]) -> bool:
+    #    #columns = self.__get_columns(balls=balls)
+    #    #return next((False for column in columns if len(set(column)) != 1), True)
+    #    return self.__calc_hash(balls=balls) == self.goal_state_hash
 
     def __get_top_index(self, balls: list[int], x: int) -> int:
         ret = self.nof_rows
@@ -176,7 +181,8 @@ class ColorSorter:
                 self.cache_hits = self.cache_hits + 1
                 return cached_result
         
-        if self.__is_in_goal_state(balls=balls):
+        #if self.__is_in_goal_state(balls=balls):
+        if position_hash == self.goal_state_hash:
             ret = ColorSortResult(successful=True, post_move_hashes=[], max_moves=max_moves)
             self.result_cache[position_hash] = ret
             return ret
