@@ -1,7 +1,8 @@
 import asyncio
 import sys
-
-sys.path.append("../src/ballsort")
+import pathlib
+abspath = pathlib.Path(__file__).parent.joinpath("../src/ballsort").resolve()
+sys.path.append(f"{abspath}")
 
 from ball_control import BallControl
 from state_update_model import StateBall, StatePosition

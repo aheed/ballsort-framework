@@ -76,6 +76,7 @@ class BallControlSim(BallControl, ScenarioControl):
         return self.state.claws[claw_index].pos
 
     async def open_claw(self, claw_index: int = 0):
+        dropping_ball = self.state.claws[claw_index].ball != None
         try:
             delayTask = asyncio.create_task(self._delay(0.3))
             self.state = self.state_manager.open_claw_start(state=self.state, claw_index=claw_index)
@@ -83,7 +84,7 @@ class BallControlSim(BallControl, ScenarioControl):
             await self.__send_update()
             await delayTask
         finally:
-            self.state, dirty = self.state_manager.open_claw_end(state=self.state, claw_index=claw_index)
+            self.state, dirty = self.state_manager.open_claw_end(state=self.state, claw_index=claw_index, ball_dropped=dropping_ball)
             if dirty:
                 await self.__send_update(include_balls=True)
 
