@@ -2,7 +2,7 @@ import asyncio
 from dataclasses import replace
 import sys
 
-from test_utils import move_ball
+from test_utils import move_ball, move_ball_by_column
 sys.path.append("../src/ballsort")
 
 from control_factory import get_control_sim
@@ -42,25 +42,19 @@ def goal_state():
     assert sc.is_in_goal_state(state) == True
 
 
-async def example_solution():
+async def example_solution_single_claw():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch14Scenario())
 
     async def sort_column(x: int):
 
-        def __get_temporary_position(x: int, i: int) -> StatePosition:
-            dst_x = i if i < x else i+1
-            dst_y = 4 if dst_x == 0 or dst_x == 5 else 0
-            return StatePosition(x=dst_x, y=dst_y)
+        def get_temporary_column(x: int, i: int) -> int:
+            return i if i < x else i+1
         
         for i in range(4):
-            src = StatePosition(x=x, y=i+1)
-            dst = __get_temporary_position(x=x, i=i)
-            await move_ball(bc=bc, src=src, dest=dst)
+            await move_ball_by_column(bc=bc, src_x=x, dest_x=get_temporary_column(x=x, i=i))
         for i in range(4):
-            src = __get_temporary_position(x=x, i=i)
-            dst = StatePosition(x=x, y=4-i)
-            await move_ball(bc=bc, src=src, dest=dst)
+            await move_ball_by_column(bc=bc, src_x=get_temporary_column(x=x, i=i), dest_x=x)
 
     for i in range(1, 5):
         await sort_column(x=i)
@@ -69,7 +63,7 @@ async def example_solution():
 
 def test_ch14():
     goal_state()
-    asyncio.run(example_solution())
+    asyncio.run(example_solution_single_claw())
 
 if __name__ == "__main__":
     import time

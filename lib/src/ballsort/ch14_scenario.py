@@ -13,7 +13,7 @@ class Ch14Scenario(Scenario):
     """Challenge Implementation"""
 
     def get_goal_state_description(self) -> str:
-        return f"Turn Polish flag 🇵🇱 into Indonesian flag 🇮🇩.\n{self.get_dimensions_description()}"
+        return f"Turn Polish flag 🇵🇱 into Indonesian flag 🇮🇩.\nClaw 0 can operate in columns 0-4. Claw 1 can operate in columns 1-5.\n{self.get_dimensions_description()}"
     
     def get_initial_state(self) -> StateModel:
         
@@ -26,8 +26,11 @@ class Ch14Scenario(Scenario):
         max_x = 5
         for x in range(1, max_x): #intentionally leave rightmost and leftmost column empty
             balls = balls + build_column(x=x)
+
+        claw0 = replace(get_default_state().claws[0], max_x = 4)
+        claw1 = replace(claw0, pos=StatePosition(x=6, y=0), min_x=1, max_x = 5)
         
-        return replace(get_default_state(), balls = balls, max_x=max_x)
+        return replace(get_default_state(), balls = balls, max_x=max_x, claws=[claw0, claw1])
 
     def is_in_goal_state(self, state: StateModel) -> bool:
 
