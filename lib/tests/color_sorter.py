@@ -116,18 +116,27 @@ class ColorSorter:
             balls=balls, x=dest_x, y=dest_col_top_y
         )
 
-    def __get_meaningful_moves(self, balls: list[int]) -> list[tuple[int, int]]:
+    def __get_meaningful_moves(self, balls: list[int], last_move_color: int, last_move_x: int) -> list[tuple[int, int]]:
         all_moves = [
             (src_col, dest_col)
             for src_col in range(self.nof_columns)
             for dest_col in range(self.nof_columns)
             if src_col != dest_col
         ]
-        return [
+        good_moves = [
             move
             for move in all_moves
             if self.__is_move_meaningful(balls=balls, move=move)
         ]
+
+        for move in good_moves:
+            src_x, _ = move
+            if src_x == last_move_x:
+                src_y = self.__get_top_index(balls=balls, x=src_x)
+                if last_move_color == self.__get_color(balls=balls, x=src_x, y=src_y):
+                    return [move] # previous move was same color and from same column. No reason to make any other move.
+
+        return good_moves
 
     def __make_move(self, balls: list[int], src_x: int, dest_x: int) -> list[int]:
         src_y = self.__get_top_index(balls=balls, x=src_x)
@@ -145,6 +154,8 @@ class ColorSorter:
         previous_positions: set[int],
         position_hash: int,
         max_moves: int,
+        last_move_color: int,
+        last_move_x: int
     ) -> ColorSortResult:
         if position_hash in self.result_cache:
             cached_result = self.result_cache[position_hash]
@@ -165,8 +176,10 @@ class ColorSorter:
         max_submoves = max_moves - 1
         fewest_moves = 10000
         if max_submoves > 0:
-            for move in self.__get_meaningful_moves(balls=balls):
-                src_x, dest_x = move
+            for move in self.__get_meaningful_moves(balls=balls, last_move_color=last_move_color, last_move_x=last_move_x):
+                src_x, dest_x = move                
+                src_y = self.__get_top_index(balls=balls, x=src_x)
+                new_move_color = self.__get_color(balls=balls, x=src_x, y=src_y)
 
                 post_move_state = self.__make_move(
                     balls=balls, src_x=src_x, dest_x=dest_x
@@ -184,6 +197,8 @@ class ColorSorter:
                         previous_positions=all_positions,
                         position_hash=new_position_hash,
                         max_moves=max_submoves,
+                        last_move_color=new_move_color,
+                        last_move_x=src_x
                     )
 
                     nof_submoves = len(move_result.post_move_hashes)
@@ -208,7 +223,7 @@ class ColorSorter:
         moves: list[tuple[int, int]] = []
         confirmed_state = balls
         for hash in sort_result.post_move_hashes:
-            for move in self.__get_meaningful_moves(balls=confirmed_state):
+            for move in self.__get_meaningful_moves(balls=confirmed_state, last_move_color=self.empty_color, last_move_x=-1):
                 src_x, dest_x = move
                 post_move_state = self.__make_move(
                     balls=confirmed_state, src_x=src_x, dest_x=dest_x
@@ -223,7 +238,7 @@ class ColorSorter:
     def find_winning_sequence(self, balls: list[int]) -> list[tuple[int, int]]:
         hash = self.__calc_hash(balls=balls)
         search_result = self.__find_winning_sequence_recursive(
-            balls=balls, previous_positions=set(), position_hash=hash, max_moves=200
+            balls=balls, previous_positions=set(), position_hash=hash, max_moves=200, last_move_color=self.empty_color, last_move_x=-1
         )
         if not search_result.successful:
             raise ValueError("Unwinnable starting position")
