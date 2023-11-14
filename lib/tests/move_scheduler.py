@@ -85,7 +85,7 @@ class MoveScheduler:
             return [x for x in range(min(current_x, dest_x), max(current_x, dest_x) + 1) if x != current_x]
 
         async def acquire_columns(columns: list[int]):
-            print("acquiring columns", columns)
+            #print("acquiring columns", columns)
             accessed_columns: list[int] = []
             for x in columns:
                 try:
@@ -98,10 +98,20 @@ class MoveScheduler:
                     raise TimeoutError
                 
         def release_columns(columns: list[int]):
-            print("releasing columns", columns)
+            #print("releasing columns", columns)
             for x in columns:
-                print("releasing column", x)
                 column_locks[x].release()
+
+        async def go_to_pos_exclusive(bc: BallControl, dest: StatePosition, open_claw: bool, claw_index: int = 0):
+            origin_x = bc.get_state().claws[claw_index].pos.x
+            columns_to_acquire = get_columns_to_access(current_x=origin_x, dest_x=dest.x)
+            await acquire_columns(columns=columns_to_acquire)
+            await go_to_pos(bc=bc, dest=dest, open_claw=open_claw, claw_index=claw_index)
+            columns_to_release = [x for x in columns_to_acquire if x != dest.x] + [origin_x]
+            release_columns(columns=columns_to_release)
+
+        async def go_home_exclusive():
+            await go_to_pos_exclusive(bc=bc, dest=StatePosition(x=home_x, y=0), claw_index=claw_index, open_claw=False)
 
         # claim access to the current column. Should not fail.
         await column_locks[bc.get_state().claws[claw_index].pos.x].acquire()
@@ -122,64 +132,30 @@ class MoveScheduler:
             
             sched_move = sched_moves[ongoing_move_index]
 
-            current_x = bc.get_state().claws[claw_index].pos.x
-
-            if ball_in_claw:
-                try: 
-                    #async with asyncio.timeout(0.5):
-
-                    #  await dependency move
+            try:
+                if ball_in_claw:
                     if e := drop_dependencies.get(ongoing_move_index):
                         await asyncio.wait_for(e.wait(), timeout=1.0)
-                        
-                    #  await column access
-                    columns_to_acquire = get_columns_to_access(current_x=current_x, dest_x=sched_move.dest_x)
-                    await acquire_columns(columns=columns_to_acquire)
-                
-                except TimeoutError:
+
+                    await go_to_pos_exclusive(bc=bc, dest=get_column_top_vacant_pos(bc=bc, x=sched_move.dest_x), open_claw=False, claw_index=claw_index)
+                    await bc.open_claw(claw_index=claw_index)
+                    sched_moves[ongoing_move_index].status = SchedMoveStatus.DROPPED
+                    sched_moves[ongoing_move_index].drop_event.set()
+                    ball_in_claw = False
+                    ongoing_move_index = None
+                else:
+                    if e := grab_dependencies.get(ongoing_move_index):
+                        await asyncio.wait_for(e.wait(), timeout=1.0)
+
+                    await go_to_pos_exclusive(bc=bc, dest=get_column_top_occupied_pos(bc=bc, x=sched_move.src_x), open_claw=True, claw_index=claw_index)
+                    await bc.close_claw(claw_index=claw_index)
+                    sched_moves[ongoing_move_index].status = SchedMoveStatus.GRABBED
+                    sched_moves[ongoing_move_index].grab_event.set()
+                    ball_in_claw = True
+            except TimeoutError:
                     print("Waiting for move access timed out. Move out of the way to avoid possible deadlock.")
-                    await go_home()
+                    await go_home_exclusive()
                     continue
-
-                #  execute
-                await go_to_pos(bc=bc, dest=get_column_top_vacant_pos(bc=bc, x=sched_move.dest_x), open_claw=False, claw_index=claw_index)
-                await bc.open_claw(claw_index=claw_index)
-                sched_moves[ongoing_move_index].status = SchedMoveStatus.DROPPED
-                sched_moves[ongoing_move_index].drop_event.set()
-                ##
-                columns_to_release = [x for x in columns_to_acquire if x != sched_move.dest_x] + [sched_move.src_x]
-                release_columns(columns=columns_to_release)
-                ##
-                ball_in_claw = False
-                ongoing_move_index = None
-            else:
-                try: 
-                    async with asyncio.timeout(0.5):
-                        #  await dependency
-                        if e := grab_dependencies.get(ongoing_move_index):
-                            await e.wait()
-                
-                        #  await column access
-
-                    #  await column access
-                    columns_to_acquire = get_columns_to_access(current_x=current_x, dest_x=sched_move.src_x)
-                    await acquire_columns(columns=columns_to_acquire)
-
-                except TimeoutError:
-                    print("Waiting for grab access timed out. Move out of the way to avoid possible deadlock.")
-                    await go_home()
-                    continue
-
-                #  execute
-                await go_to_pos(bc=bc, dest=get_column_top_occupied_pos(bc=bc, x=sched_move.src_x), open_claw=True, claw_index=claw_index)
-                await bc.close_claw(claw_index=claw_index)
-                sched_moves[ongoing_move_index].status = SchedMoveStatus.GRABBED
-                sched_moves[ongoing_move_index].grab_event.set()
-                ##
-                columns_to_release = [x for x in columns_to_acquire if x != sched_move.src_x] + [current_x]
-                release_columns(columns=columns_to_release)
-                ##
-                ball_in_claw = True
 
     async def make_moves_multi_claw(self, bc: BallControl, claws: list[Claw], moves: list[tuple[int, int]]):
         """Assumes two claws for now"""
