@@ -1,7 +1,10 @@
 import asyncio
 from dataclasses import replace
 import sys
-sys.path.append("../src/ballsort")
+import pathlib
+
+abspath = pathlib.Path(__file__).parent.joinpath("../src/ballsort").resolve()
+sys.path.append(f"{abspath}")
 
 from move_scheduler import MoveScheduler
 from control_factory import get_control_sim

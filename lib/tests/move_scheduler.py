@@ -107,7 +107,7 @@ class MoveScheduler:
             columns_to_acquire = get_columns_to_access(current_x=origin_x, dest_x=dest.x)
             await acquire_columns(columns=columns_to_acquire)
             await go_to_pos(bc=bc, dest=dest, open_claw=open_claw, claw_index=claw_index)
-            columns_to_release = [x for x in columns_to_acquire if x != dest.x] + [origin_x]
+            columns_to_release = [x for x in columns_to_acquire if x != dest.x] + ([origin_x] if origin_x != dest.x else [])
             release_columns(columns=columns_to_release)
 
         async def go_home_exclusive():

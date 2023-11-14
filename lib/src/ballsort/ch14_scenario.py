@@ -28,7 +28,7 @@ class Ch14Scenario(Scenario):
             balls = balls + build_column(x=x)
 
         claw0 = replace(get_default_state().claws[0], max_x = 4)
-        claw1 = replace(claw0, pos=StatePosition(x=6, y=0), min_x=1, max_x = 5)
+        claw1 = replace(claw0, pos=StatePosition(x=5, y=0), min_x=1, max_x = 5)
         
         return replace(get_default_state(), balls = balls, max_x=max_x, claws=[claw0, claw1])
 
