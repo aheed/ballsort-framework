@@ -74,7 +74,7 @@ async def example_solution_multi_claw():
     await bc.set_scenario(Ch14Scenario())
 
     scheduler = MoveScheduler()
-    await scheduler.make_moves_multi_claw(bc=bc, claws=bc.get_state().claws, moves=get_winning_sequence())
+    await scheduler.make_moves_multi_claw(bc=bc, claws=bc.get_state().claws, moves=get_winning_sequence(), timeout_sec=0.01)
 
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
 
