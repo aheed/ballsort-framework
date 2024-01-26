@@ -1,10 +1,12 @@
 import asyncio
 from dataclasses import replace
 import sys
-sys.path.append("../src/ballsort")
+import pathlib
 
-from ball_control import BallControl
-from test_utils import move_ball_by_column
+abspath = pathlib.Path(__file__).parent.joinpath("../src/ballsort").resolve()
+sys.path.append(f"{abspath}")
+
+from move_scheduler import MoveScheduler
 from control_factory import get_control_sim
 from ch14_scenario import Ch14Scenario
 from state_update_model import StateBall, StatePosition
@@ -41,11 +43,6 @@ def goal_state():
     state = replace(sc.get_initial_state(), balls=balls)
     assert sc.is_in_goal_state(state) == True
 
-async def make_moves_single_claw(bc: BallControl,  moves: list[tuple[int, int]]):
-    for move in moves:
-        src_x, dest_x = move
-        await move_ball_by_column(bc=bc, src_x=src_x, dest_x=dest_x)
-
 def get_winning_sequence() -> list[tuple[int, int]]:
     moves: list[tuple[int, int]] = []
     def sort_column(x: int):
@@ -67,13 +64,24 @@ async def example_solution_single_claw():
     bc = get_control_sim(0)
     await bc.set_scenario(Ch14Scenario())
 
-    await make_moves_single_claw(bc=bc, moves=get_winning_sequence())
+    scheduler = MoveScheduler()
+    await scheduler.make_moves_single_claw(bc=bc, moves=get_winning_sequence())
+
+    print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
+
+async def example_solution_multi_claw():
+    bc = get_control_sim(0)
+    await bc.set_scenario(Ch14Scenario())
+
+    scheduler = MoveScheduler()
+    await scheduler.make_moves_multi_claw(bc=bc, claws=bc.get_state().claws, moves=get_winning_sequence(), timeout_sec=0.01)
 
     print(f"virtual time elapsed: {bc.get_state().elapsed:0.3f} seconds")
 
 def test_ch14():
     goal_state()
-    asyncio.run(example_solution_single_claw())
+    #asyncio.run(example_solution_single_claw())
+    asyncio.run(example_solution_multi_claw())
 
 if __name__ == "__main__":
     import time
