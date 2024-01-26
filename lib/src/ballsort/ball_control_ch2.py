@@ -23,8 +23,7 @@ class BallControlCh2(BallControlSim, ScenarioControl):
         left_pos = StatePosition(x=2, y=4)
         right_pos = StatePosition(x=3, y=4)
 
-        any_illegal_claw = next((True for claw in self.state.claws if (claw.pos == left_pos or claw.pos == right_pos) and claw.operating_claw), False)
-        if any_illegal_claw:
+        if any((claw.pos == left_pos or claw.pos == right_pos) and claw.operating_claw for claw in self.state.claws):
             raise IllegalBallControlStateError("Scales can not be used while claw is opening or closing.")
         
         await self._delay(0.3)

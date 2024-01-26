@@ -91,7 +91,7 @@ class Ch12Scenario(Scenario):
         if state.claws[0].ball:
             return False
         
-        return next((False for ball in state.balls if ball.pos.x < 4 and ball.pos.x != ball.value), True)
+        return all(ball.pos.x == ball.value for ball in state.balls if ball.pos.x < 4)
 
     def on_ball_dropped(
         self, state: StateModel, ball: StateBall

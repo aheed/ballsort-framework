@@ -10,13 +10,8 @@ def is_ball_in_claw(state: StateModel, claw_index: int) -> bool:
 
 
 def is_ball_at_current_pos(state: StateModel, claw_index: int) -> bool:
-    return next(
-        (True for ball in state.balls if ball.pos == state.claws[claw_index].pos),
-        False,
-    )
-    # balls_at_current_pos = filter(lambda ball: ball.pos == self.state.claw.pos, self.state.balls)
-    # return any(balls_at_current_pos)
-
+    return any(ball.pos == state.claws[claw_index].pos for ball in state.balls)
+    
 def get_ball_at(state: StateModel, pos: StatePosition) -> StateBall | None:
     return next(
         (ball for ball in state.balls if pos == ball.pos),
@@ -24,10 +19,7 @@ def get_ball_at(state: StateModel, pos: StatePosition) -> StateBall | None:
     )
 
 def get_ball_at_current_pos(state: StateModel, claw_index: int) -> StateBall | None:
-    return next(
-        (ball for ball in state.balls if ball.pos == state.claws[claw_index].pos),
-        None,
-    )
+    return get_ball_at(state=state, pos=state.claws[claw_index].pos)
 
 def get_top_occupied_index(state: StateModel, claw_index: int) -> int:
     y_indexes_in_current_column = [

@@ -34,6 +34,5 @@ class Ch4Scenario(Scenario):
                 return False
             return True
 
-        return not next((True for ball in state.balls if not validate_ball(ball)), False)
-    
+        return all(validate_ball(ball) for ball in state.balls)
     

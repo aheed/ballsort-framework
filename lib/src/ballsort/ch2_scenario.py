@@ -33,15 +33,15 @@ class Ch2Scenario(Scenario):
             return False
         
         # yellow at bottom
-        if not next((True for y_ball in state.balls if y_ball.color == "yellow" and y_ball.pos == StatePosition(x=MIN_X, y=state.max_y)), False):
+        if not any(y_ball.pos == StatePosition(x=MIN_X, y=state.max_y) for y_ball in state.balls if y_ball.color == "yellow"):
             return False
 
         # green in the middle
-        if not next((True for g_ball in state.balls if g_ball.color == "green" and g_ball.pos == StatePosition(x=MIN_X, y=state.max_y-1)), False):
+        if not any(g_ball.pos == StatePosition(x=MIN_X, y=state.max_y-1) for g_ball in state.balls if g_ball.color == "green"):
             return False
         
         # blue on top
-        if not next((True for b_ball in state.balls if b_ball.color == "blue" and b_ball.pos == StatePosition(x=MIN_X, y=state.max_y-2)), False):
+        if not any(b_ball.pos == StatePosition(x=MIN_X, y=state.max_y-2) for b_ball in state.balls if b_ball.color == "blue"):
             return False
         
         return True

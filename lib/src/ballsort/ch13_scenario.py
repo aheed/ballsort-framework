@@ -81,8 +81,19 @@ class Ch13Scenario(Scenario):
         for ball in state.balls:
             columns[ball.pos.x].append(ball)
 
-        # No more than one color per column
-        return next((False for column in columns if (len(column) != (self.max_y+1) and len(column) != 0) or len(set([ball.color for ball in column])) > 1), True)
+        def validate_column(column: list[StateBall]) -> bool:
+            if len(column) == 0:
+                return True
+            
+            if len(column) != (self.max_y+1):
+                return False
+            
+            if len(set([ball.color for ball in column])) > 1:
+                return False
+            
+            return True
+
+        return all(validate_column(column=column) for column in columns)
 
     def on_ball_dropped(
         self, state: StateModel, ball: StateBall

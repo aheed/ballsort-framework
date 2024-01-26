@@ -43,13 +43,11 @@ class Ch5Scenario(Scenario):
                 return True # empty column is ok
             
             bottom_ball = column[0]
-            # Column must contain no ball with color different than the bottom ball color
-            return not next((True for ball in column if ball.color != bottom_ball.color), False)
+            return all(ball.color == bottom_ball.color for ball in column)
         
         # There shall be exactly two populated columns
         if len([True for column in columns if len(column) > 0]) != 2:
             return False
 
-        # There must be no non-compliant columns
-        return not next((True for x in range(state.max_x + 1) if not column_is_goal_state_compliant(x)), False)
+        return all(column_is_goal_state_compliant(x) for x in range(state.max_x + 1))
     
